@@ -460,3 +460,4 @@ $RECYCLE.BIN/
 **/obj
 **/bin
 *.db
+*.dll
