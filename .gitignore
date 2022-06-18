@@ -454,3 +454,9 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 /API/skinet.db-shm
 /API/skinet.db-wal
+/API/identity.db-shm
+/API/identity.db-wal
+
+**/obj
+**/bin
+*.db
