@@ -99,7 +99,7 @@ namespace API.Controllers
 
             if (CheckEmailExistsAsync(registerDto.Email).Result.Value)
             {
-                return new BadRequestObjectResult(new ApiValidationErrorResponse{Errors=new []{"Email is in use}"}});
+                return new BadRequestObjectResult(new ApiValidationErrorResponse{Errors=new []{"Email is in use"}});
             }
 
             
