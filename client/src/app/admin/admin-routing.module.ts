@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { BasketComponent } from './basket.component';
+import { AdminComponent } from './admin.component';
+import { AuthGuard } from '../core/guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', component: BasketComponent }
+  { path: '', canActivate: [AuthGuard], component: AdminComponent }
 ];
 
 @NgModule({
@@ -15,4 +16,4 @@ const routes: Routes = [
     RouterModule
   ]
 })
-export class BasketRoutingModule { }
+export class AdminRoutingModule { }
