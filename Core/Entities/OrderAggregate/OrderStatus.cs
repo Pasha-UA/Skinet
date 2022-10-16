@@ -12,4 +12,11 @@ namespace Core.Entities.OrderAggregate
         PaymentFailed
 
     }
+
+    // public class OrderStatuss
+    // {
+    //     public string Value {get; set;}
+    //     public string Name {get; set;}
+    // }
+
 }

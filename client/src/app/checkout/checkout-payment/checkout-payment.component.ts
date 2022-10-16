@@ -4,7 +4,7 @@ import { NavigationExtras, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { BasketService } from 'src/app/basket/basket.service';
 import { IBasket } from 'src/app/shared/models/basket';
-import { IOrder } from 'src/app/shared/order';
+import { IOrder } from 'src/app/shared/models/order';
 import { CheckoutService } from '../checkout.service';
 
 @Component({
@@ -15,24 +15,33 @@ import { CheckoutService } from '../checkout.service';
 export class CheckoutPaymentComponent implements OnInit {
   @Input() checkoutForm: FormGroup;
 
-  constructor(private basketService: BasketService, private checkoutService: CheckoutService, private toastr: ToastrService, private router: Router) { }
+  constructor(
+    private basketService: BasketService,
+    private checkoutService: CheckoutService,
+    private toastr: ToastrService,
+    private router: Router) { }
 
   ngOnInit(): void {
   }
 
-  submitOrder(){
+  submitOrder() {
     const basket = this.basketService.getCurrentBasketValue();
     const orderToCreate = this.getOrderToCreate(basket);
-    this.checkoutService.createOrder(orderToCreate).subscribe((order: IOrder)=> {
-      this.toastr.success('Order created succesfully');
-      this.basketService.deleteLocalBasket(basket.id);
-      const navigationExtras: NavigationExtras = {state: order};
-      this.router.navigate(['checkout/success'], navigationExtras);
-      console.log(order);
-    }, error => {
-      this.toastr.error(error.message);
-      console.log(error);
-    });
+    this.checkoutService.createOrder(orderToCreate).subscribe(
+      {
+        next: (order: IOrder) => {
+          this.toastr.success('Order created succesfully');
+          this.basketService.deleteLocalBasket(basket.id);
+          const navigationExtras: NavigationExtras = { state: order };
+          this.router.navigate(['checkout/success'], navigationExtras);
+          console.log(order);
+        },
+        error: error => {
+          this.toastr.error(error.message);
+          console.log(error);
+        }
+      }
+    );
   }
 
   getOrderToCreate(basket: IBasket) {

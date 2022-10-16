@@ -29,19 +29,27 @@ export class BasketService {
         ));
   }
 
-  setShippingPrice(deliveryMethod: IDeliveryMethod){
+  setShippingPrice(deliveryMethod: IDeliveryMethod) {
     this.shipping = deliveryMethod.price;
+    const basket = this.getCurrentBasketValue();
+    basket.deliveryMethodId = deliveryMethod.id;
     this.calculateTotals();
+    this.setBasket(basket);
+    
   }
 
   setBasket(basket: IBasket) {
-    return this.httpClient.post(this.baseUrl + 'basket', basket).subscribe((response: IBasket) => {
-      this.basketSource.next(response);
-      this.calculateTotals();
-      console.log(response);
-    }, error => {
-      console.log(error);
-    })
+    return this.httpClient.post(this.baseUrl + 'basket', basket).subscribe(
+      {
+        next: (response: IBasket) => {
+          this.basketSource.next(response);
+          this.calculateTotals();
+          console.log(response);
+        },
+        error: error => {
+          console.log(error);
+        }
+      })
   }
 
 
@@ -86,20 +94,24 @@ export class BasketService {
     }
   }
 
-  deleteLocalBasket(id:string){
+  deleteLocalBasket(id: string) {
     this.basketSource.next(null);
     this.basketTotalSource.next(null);
     localStorage.removeItem('basket_id');
   }
 
   deleteBasket(basket: IBasket) {
-    return this.httpClient.delete(this.baseUrl + 'basket?id=' + basket.id).subscribe(() => {
-      this.basketSource.next(null);
-      this.basketTotalSource.next(null);
-      localStorage.removeItem('basket_id');
-    }, error => {
-      console.log(error);
-    });
+    return this.httpClient.delete(this.baseUrl + 'basket?id=' + basket.id).subscribe(
+      {
+        next: () => {
+          this.basketSource.next(null);
+          this.basketTotalSource.next(null);
+          localStorage.removeItem('basket_id');
+        },
+        error: error => {
+          console.log(error);
+        }
+      });
   }
 
 

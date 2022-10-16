@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Core.Entities.Identity;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,8 +18,10 @@ namespace API.Extensions
         {
             var builder = services.AddIdentityCore<AppUser>();
             builder = new IdentityBuilder(builder.UserType, builder.Services);
+            builder.AddRoles<IdentityRole>();
             builder.AddEntityFrameworkStores<AppIdentityDbContext>();
             builder.AddSignInManager<SignInManager<AppUser>>();
+//            builder.AddRoleManager<RoleManager<UserRole>>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -33,6 +36,7 @@ namespace API.Extensions
 
                     };
                 });
+//            services.AddAuthorization(options=>options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireRole().);
 
             return services;
         }

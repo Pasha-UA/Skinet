@@ -1,15 +1,24 @@
 import { Injectable } from '@angular/core';
-import { Route } from '@angular/router';
+import { ActivatedRouteSnapshot, Route, RouterStateSnapshot } from '@angular/router';
+import { map, Observable, of } from 'rxjs';
 import { AccountService } from 'src/app/account/account.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class RoleGuardService {
+export class RoleGuard {
 
   constructor(private accountSercice: AccountService, private route: Route) { }
 
-  // canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+    // TODO role-based guard
+
+    return of(true);
+  }
+
+  // canActivate(
+  //   route: ActivatedRouteSnapshot, 
+  //   state: RouterStateSnapshot): Observable<boolean> {
   //   return this.accountSercice.canActivateProtectedRoutes$.pipe(
   //     map((canActivateProtectedRoutes: boolean) => {
   //       if (canActivateProtectedRoutes) {
@@ -40,3 +49,4 @@ export class RoleGuardService {
   // }
 
 }
+

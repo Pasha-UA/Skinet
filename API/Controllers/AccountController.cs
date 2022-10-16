@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using API.Dtos;
 using API.Errors;
 using API.Extensions;
@@ -69,7 +64,7 @@ namespace API.Controllers
             return await _userManager.FindByEmailAsync(email) != null;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]        
         [HttpGet("address")]
         public async Task<ActionResult<AddressDto>> GetUserAddressAsync()
         {

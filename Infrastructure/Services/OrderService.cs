@@ -23,7 +23,7 @@ namespace Infrastructure.Services
         {
             // get basket from the repo
             var basket = await _basketRepo.GetBasketAsync(basketId);
-            
+
             //get items from the product repo
             var items = new List<OrderItem>();
             foreach (var item in basket.Items)
@@ -37,7 +37,7 @@ namespace Infrastructure.Services
             // get delivery method from repo 
             var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(deliveryMethodId);
             // calc subtotal
-            var subtotal = items.Sum(item=>item.Price*item.Quantity);
+            var subtotal = items.Sum(item => item.Price * item.Quantity);
 
             //create order
             var order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal);
@@ -53,8 +53,6 @@ namespace Infrastructure.Services
             await _basketRepo.DeleteBasketAsync(basketId);
 
             return order;
-
-
         }
 
         public async Task<IReadOnlyList<DeliveryMethod>> GetDeliveryMethodsAsync()
@@ -75,5 +73,7 @@ namespace Infrastructure.Services
 
             return await _unitOfWork.Repository<Order>().ListAsync(spec);
         }
+
+
     }
 }

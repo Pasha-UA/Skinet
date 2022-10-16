@@ -22,7 +22,7 @@ export class RegisterComponent implements OnInit {
   createRegisterForm() {
     this.registerForm = this.fb.group({
       displayName: [null, [Validators.required]],
-      email: [null, 
+      email: [null,
         [Validators.required, Validators.pattern('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')],
         [this.validateEmailNotTaken()]
       ],
@@ -48,11 +48,15 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    this.accountService.register(this.registerForm.value).subscribe(response => {
-      this.router.navigateByUrl('/shop');
-    }, error => {
-      console.log(error);
-      this.errors = error.errors;
-    })
+    this.accountService.register(this.registerForm.value).subscribe(
+      {
+        next: response => {
+          this.router.navigateByUrl('/shop');
+        },
+        error: error => {
+          console.log(error);
+          this.errors = error.errors;
+        }
+      })
   }
 }

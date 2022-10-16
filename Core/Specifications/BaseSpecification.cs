@@ -15,7 +15,6 @@ namespace Core.Specifications
         public BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             Criteria = criteria;
-
         }
 
         public Expression<Func<T, bool>> Criteria { get; }
