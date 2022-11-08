@@ -17,11 +17,11 @@ namespace API.Extensions
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
             var builder = services.AddIdentityCore<AppUser>();
-            builder = new IdentityBuilder(builder.UserType, builder.Services);
-            builder.AddRoles<IdentityRole>();
+            builder = new IdentityBuilder(builder.UserType, typeof(AppRole), builder.Services);
             builder.AddEntityFrameworkStores<AppIdentityDbContext>();
             builder.AddSignInManager<SignInManager<AppUser>>();
-//            builder.AddRoleManager<RoleManager<UserRole>>();
+            builder.AddRoleValidator<RoleValidator<AppRole>>();
+            builder.AddRoleManager<RoleManager<AppRole>>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

@@ -6,6 +6,9 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { AdminOrdersComponent } from './components/admin-orders/admin-orders.component';
 import { FormsModule } from '@angular/forms';
 import { AdminOrderSummaryComponent } from './components/admin-order-summary/admin-order-summary.component';
+import { EditProductComponent } from './components/edit-product/edit-product.component';
+import { EditProductFormComponent } from './components/edit-product-form/edit-product-form.component';
+import { EditProductPhotosComponent } from './components/edit-product-photos/edit-product-photos.component';
 
 
 
@@ -13,10 +16,12 @@ import { AdminOrderSummaryComponent } from './components/admin-order-summary/adm
   declarations: [
     AdminComponent,
     AdminOrdersComponent,
-    AdminOrderSummaryComponent
+    AdminOrderSummaryComponent,
+    EditProductComponent,
+    EditProductFormComponent,
+    EditProductPhotosComponent
   ],
   imports: [
-    FormsModule,
     CommonModule,
     SharedModule,
     AdminRoutingModule

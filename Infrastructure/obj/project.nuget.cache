@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "VmhlqxfhGoNW+SV+RwZF3u2sfjSCI9g1Tnx4b59/cKFioHqsKmJklFHXIVfz/YaUvxuYl+SdbpwgyBiJQa6FgQ==",
+  "dgSpecHash": "B3xPnwXMDvAd2/Ot1L+CzrTbCBZA4os9Ue6spZvyV48lSzXCFhK3Cc3Qgg/eFix9kHLi211e8gpRAWJi+SVLSA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -18,7 +18,7 @@
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.http\\2.2.0\\microsoft.aspnetcore.http.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.http.abstractions\\2.2.0\\microsoft.aspnetcore.http.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.http.extensions\\2.2.0\\microsoft.aspnetcore.http.extensions.2.2.0.nupkg.sha512",
-    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.http.features\\2.2.0\\microsoft.aspnetcore.http.features.2.2.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.http.features\\3.1.3\\microsoft.aspnetcore.http.features.3.1.3.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.identity\\2.2.0\\microsoft.aspnetcore.identity.2.2.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.identity.entityframeworkcore\\6.0.3\\microsoft.aspnetcore.identity.entityframeworkcore.6.0.3.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.webutilities\\2.2.0\\microsoft.aspnetcore.webutilities.2.2.0.nupkg.sha512",
