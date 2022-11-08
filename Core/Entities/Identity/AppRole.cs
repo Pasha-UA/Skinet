@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.Entities.Identity
 {
-    public class UserRole : IdentityRole
+    public class AppRole : IdentityRole
     {
-        public ICollection<AppUser> AppUsers { get; set; }
+//        public ICollection<AppUserRole> UserRoles;
     }
 }

@@ -10,45 +10,73 @@ namespace Infrastructure.Identity
     public class AppIdentityDbContextSeed
     {
 
-        public static async Task SeedRolesAsync(RoleManager<UserRole> roleManager)
+        public static async Task SeedRolesAsync(RoleManager<AppRole> roleManager)
         {
             if (!roleManager.Roles.Any())
             {
-                var roles = new UserRole[]
+                var roles = new AppRole[]
                 {
-                        new UserRole { Id = "1", Name = "Admin" },
-                        new UserRole { Id = "3", Name = "User" },
-                        new UserRole { Id = "2", Name = "Manager" }
+                        new AppRole { Id = "1", Name = "Admin" },
+                        new AppRole { Id = "3", Name = "User" },
+                        new AppRole { Id = "2", Name = "Manager" }
                 };
-                foreach (var role in roles) 
+                foreach (var role in roles)
                 {
-                    await roleManager.CreateAsync(role);                    
+                    await roleManager.CreateAsync(role);
                 }
             }
         }
 
-        public static async Task SeedUsersAsync(UserManager<AppUser> userManager)
+        public static async Task SeedUsersAsync(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
             if (!userManager.Users.Any())
             {
-                var user = new AppUser
+                var users = new List<AppUser>
                 {
-                    DisplayName = "Bob",
-                    Email = "bob@test.com",
-                    UserName = "bob@test.com",
-                    Address = new Address
+                    new AppUser
                     {
-                        FirstName = "Bob",
-                        LastName = "Bobbity",
-                        Street = "10th Street",
-                        City = "New York",
-                        State = "NY",
-                        ZipCode = "90210"
+                        DisplayName = "Bob",
+                        Email = "bob@test.com",
+                        UserName = "bob@test.com",
+                        Address = new Address
+                        {
+                            FirstName = "Bob",
+                            LastName = "Bobbity",
+                            Street = "10th Street",
+                            City = "New York",
+                            State = "NY",
+                            ZipCode = "90210"
+                        }
                     },
-                    UserRole = new UserRole { Id = "1", Name = "Admin" }
+                    new AppUser
+                    {
+                        DisplayName = "Admin",
+                        Email = "admin@test.com",
+                        UserName = "admin@test.com"
+                    }
+
+
+                };
+                
+                var roles = new List<AppRole>
+                {
+                    new AppRole {Name = "Admin"},
+                    new AppRole {Name = "Member"}
                 };
 
-                await userManager.CreateAsync(user, "Pa$$w0rd");
+                foreach (var role in roles)
+                {
+                    await roleManager.CreateAsync(role);
+                }
+
+
+                foreach (var user in users)
+                {
+                    await userManager.CreateAsync(user, "Pa$$w0rd");
+                    await userManager.AddToRoleAsync(user, "Member");
+                    if (user.Email == "admin@test.com") await userManager.AddToRoleAsync(user, "Admin");
+                };
+
             }
         }
     }

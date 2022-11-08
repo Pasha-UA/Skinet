@@ -9,8 +9,8 @@ namespace Core.Entities.Identity
 
         public Address Address { get; set; }
 
-        [Required]
-        public UserRole UserRole { get; set; }
+//        [Required]
+//        public AppRole AppRole { get; set; }
 
     }
 }

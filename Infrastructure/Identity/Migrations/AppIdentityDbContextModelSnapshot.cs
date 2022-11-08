@@ -108,7 +108,7 @@ namespace Infrastructure.Identity.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UserRoleId")
+                    b.Property<string>("AppRoleId")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -121,7 +121,7 @@ namespace Infrastructure.Identity.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("UserRoleId");
+                    b.HasIndex("AppRoleId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -282,7 +282,7 @@ namespace Infrastructure.Identity.Migrations
                 {
                     b.HasOne("Core.Entities.Identity.UserRole", "UserRole")
                         .WithMany("AppUsers")
-                        .HasForeignKey("UserRoleId")
+                        .HasForeignKey("AppRoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
