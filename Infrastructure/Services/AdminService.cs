@@ -32,7 +32,6 @@ namespace Infrastructure.Services
 
         public async Task<Order> UpdateOrderStatusAsync(int orderId, OrderStatus orderStatus)
         {
-            // Console.WriteLine(orderId + " " + orderStatus.ToString());
             var spec = new OrdersWithItemsAndOrderingSpecification(orderId);
             var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
 

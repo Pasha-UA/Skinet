@@ -63,8 +63,10 @@ export class EditProductPhotosComponent implements OnInit {
   }
 
   setMainPhoto(photoId: number) {
-    this.adminService.setMainPhoto(photoId, this.product.id).subscribe((product: IProduct) => {
-      this.product = product;
+    this.adminService.setMainPhoto(photoId, this.product.id).subscribe({
+      next: (product: IProduct) => {
+        this.product = product;
+      }
     });
   }
 }

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { ProductFormValues } from '../shared/models/product';
@@ -17,8 +17,8 @@ export class AdminService {
   }
 
   updateOrderStatus(orderId: string, orderStatus: string) {
-    console.log(orderId, ' ', orderStatus);
-    return this.http.put(this.baseUrl + 'admin/order/' + orderId, orderStatus);
+    const paramMap = { 'orderStatusId': +orderStatus }
+    return this.http.put(this.baseUrl + 'admin/order/' + orderId, {}, { params: paramMap });
   }
 
   createProduct(product: ProductFormValues) {
@@ -50,9 +50,8 @@ export class AdminService {
     return this.http.post(this.baseUrl + 'products/' + productId + '/photo/' + photoId, {});
   }
 
-  
-  // getOrderStatuses() {
-  //   return this.http.get(this.baseUrl + 'admin/orderstatuses');
-  // }
+  getOrderStatuses() {
+    return this.http.get(this.baseUrl + 'admin/orderstatuses');
+  }
 
 }

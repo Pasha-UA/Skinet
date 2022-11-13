@@ -3,6 +3,8 @@ import { IOrderStatus } from 'src/app/shared/models/orderStatus';
 import { IOrder } from 'src/app/shared/models/order';
 import { AdminService } from '../../admin.service';
 import { Observable } from 'rxjs';
+import { BreadcrumbService } from 'xng-breadcrumb';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-admin-orders',
@@ -14,7 +16,7 @@ export class AdminOrdersComponent implements OnInit {
   orderStatuses = [];
   orders$: Observable<IOrder>;
 
-  constructor(private adminService: AdminService) { }
+  constructor(private adminService: AdminService, private toastr: ToastrService,) { }
 
   ngOnInit(): void {
     this.getOrders();
@@ -32,25 +34,15 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   getOrderStatuses() {
-    // HARDCODED STATUSES
-    this.orderStatuses = [
-      { id: 0, value: 'Pending', name: 'Pending' },
-      { id: 1, value: 'PaymentReceived', name: 'Payment Received' },
-      { id: 2, value: 'PaymentFailed', name: 'Payment Failed' }
-    ];
-
-
-    // TODO: need load statuses from backend. 
-
-    // this.adminService.getOrderStatuses().subscribe({
-    //   next: (response: IOrderStatus) => {
-    //     this.orderStatuses = [response];
-    //     console.log(response);
-    //   },
-    //   error: (e) => {
-    //     console.log(e);
-    //   }
-    // });
+    this.adminService.getOrderStatuses().subscribe({
+      next: (response: IOrderStatus[]) => {
+        this.orderStatuses = Object.values(response);
+        // console.log(this.orderStatuses)
+      },
+      error: (e) => {
+        console.log(e);
+      }
+    });
 
   }
 
@@ -58,9 +50,22 @@ export class AdminOrdersComponent implements OnInit {
     // if selectedOrder.status !== orderStatus {save new status to db}
 
     this.adminService.updateOrderStatus(orderId, orderStatus)
+      .subscribe({
+        next: (response: IOrder) => {
+          const status = this.orderStatuses.find(st => { return st.id === response.status })
+          this.toastr.success(`Order # ${orderId} status modified. New status is ${this.findStatusNameById(response.status)}`);
 
+        },
+        error: error => {
+          console.log(error)
+          this.toastr.error('не удалось обновить статус заказа');
+        }
+      })
 
-    // console.log(orderStatus);
+  }
+
+  findStatusNameById(statusId: string): string {
+    return this.orderStatuses.find(st => { return st.id === statusId }).name;
   }
 
 }

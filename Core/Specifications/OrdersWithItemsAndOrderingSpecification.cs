@@ -9,12 +9,13 @@ namespace Core.Specifications
 {
     public class OrdersWithItemsAndOrderingSpecification : BaseSpecification<Order>
     {
-        public OrdersWithItemsAndOrderingSpecification() : base()  
+        public OrdersWithItemsAndOrderingSpecification() : base()
         {
             //AddInclude(o => o.Id);
             // AddInclude(o => o.BuyerEmail);
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
+            //AddInclude(o => o.Status);
             AddOrderByDescending(o => o.OrderDate);
         }
 
@@ -22,18 +23,21 @@ namespace Core.Specifications
         {
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
+            //AddInclude(o => o.Status);
             AddOrderByDescending(o => o.OrderDate);
         }
         public OrdersWithItemsAndOrderingSpecification(int id) : base(o => o.Id == id)
         {
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
+            //AddInclude(o => o.Status);
         }
 
         public OrdersWithItemsAndOrderingSpecification(int id, string email) : base(o => o.Id == id && o.BuyerEmail == email)
         {
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
+            //AddInclude(o => o.Status);
         }
     }
 }

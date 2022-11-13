@@ -74,6 +74,9 @@ namespace Infrastructure.Services
             return await _unitOfWork.Repository<Order>().ListAsync(spec);
         }
 
-
+        public OrderStatuses GetOrderStatuses()
+        {
+            return new OrderStatuses();
+        }
     }
 }

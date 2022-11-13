@@ -13,7 +13,7 @@ export class AdminComponent implements OnInit {
   products: IProduct[];
   totalCount: number;
   shopParams: ShopParams;
-  
+
   constructor(private shopService: ShopService, private adminService: AdminService) {
     this.shopParams = this.shopService.getShopParams();
   }
@@ -22,11 +22,14 @@ export class AdminComponent implements OnInit {
   }
 
   getProducts(useCache = false) {
-    this.shopService.getProducts(useCache).subscribe(response => {
-      this.products = response.data;
-      this.totalCount = response.count;
-    }, error => {
-      console.log(error);
+    this.shopService.getProducts(useCache).subscribe({
+      next: response => {
+        this.products = response.data;
+        this.totalCount = response.count;
+      },
+      error: error => {
+        console.log(error);
+      }
     });
   }
 
@@ -40,9 +43,11 @@ export class AdminComponent implements OnInit {
   }
 
   deleteProduct(id: number) {
-    this.adminService.deleteProduct(id).subscribe((response: any) => {
-      this.products.splice(this.products.findIndex(p => p.id === id), 1);
-      this.totalCount--;
+    this.adminService.deleteProduct(id).subscribe({
+      next: (response: any) => {
+        this.products.splice(this.products.findIndex(p => p.id === id), 1);
+        this.totalCount--;
+      }
     });
   }
 
