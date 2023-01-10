@@ -37,21 +37,19 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
+            // 1 find user by email
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null) return Unauthorized(new ApiResponse(401));
 
-            //            var res = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-
-            //var req = _signInManager.Options.SignIn.RequireConfirmedEmail;
-            //var r2 = user.EmailConfirmed;
             var result = await _signInManager.PasswordSignInAsync(user, loginDto.Password, true, false);
 
             if (!result.Succeeded)
             {
-                if (!user.EmailConfirmed && _signInManager.Options.SignIn.RequireConfirmedEmail) 
-                {
-                    return Unauthorized(new ApiResponse(401, "Email is not confirmed"));
-                } // result Requires2FA should be "true". can't sure why it is not
+                //if (!user.EmailConfirmed && _signInManager.Options.SignIn.RequireConfirmedEmail) 
+                //{
+                //    return Unauthorized(new ApiResponse(401, "Email is not confirmed"));
+                //    // and need to redirect to email confirmation page
+                //} 
 
                 return Unauthorized(new ApiResponse(401));
             }
@@ -114,20 +112,27 @@ namespace API.Controllers
 
             if (CheckEmailExistsAsync(registerDto.Email).Result.Value)
             {
-                return new BadRequestObjectResult(new ApiValidationErrorResponse{Errors=new []{"Email is in use"}});
+                return new BadRequestObjectResult(new ApiValidationErrorResponse { Errors = new[] { "Email is in use" } });
             }
 
-            
+
             var user = new AppUser
             {
                 DisplayName = registerDto.DisplayName,
                 Email = registerDto.Email,
-                UserName = registerDto.Email
+                UserName = registerDto.Email,
+                TwoFactorEnabled = true
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
-            
-            if (!result.Succeeded) return BadRequest(new ApiResponse(400));
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e=>e.Description).ToArray();
+                if (!result.Succeeded) return BadRequest(new ApiResponse(400, errors));
+            }
+
+            //            if (!result.Succeeded) return BadRequest(new ApiResponse(400));
 
             var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = Redirect(Url.PageLink(pageName: "/Account/ConfirmEmail", values: new { userId = user.Id, token = confirmationToken }));

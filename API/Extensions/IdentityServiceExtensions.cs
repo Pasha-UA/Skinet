@@ -8,6 +8,7 @@ using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Extensions
@@ -16,14 +17,7 @@ namespace API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-            //var builder = services.AddIdentityCore<AppUser>();
-            //builder = new IdentityBuilder(builder.UserType, typeof(AppRole), builder.Services);
-            //builder.AddEntityFrameworkStores<AppIdentityDbContext>();
-            //builder.AddSignInManager<SignInManager<AppUser>>();
-            //builder.AddRoleValidator<RoleValidator<AppRole>>();
-            //builder.AddRoleManager<RoleManager<AppRole>>();
-
-            services.AddIdentity<AppUser, AppRole>(options =>
+            var builder = services.AddIdentity<AppUser, AppRole>(options => 
             {
                 options.Password.RequiredLength = 8;
                 options.Password.RequireUppercase = true;
@@ -33,17 +27,21 @@ namespace API.Extensions
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
                 options.User.RequireUniqueEmail = true;
-//                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = false;
 
-            })
-            .AddEntityFrameworkStores<AppIdentityDbContext>()
-            .AddSignInManager<SignInManager<AppUser>>()
-            .AddRoleValidator<RoleValidator<AppRole>>()
-            .AddRoleManager<RoleManager<AppRole>>()
-//            .AddDefaultTokenProviders()
-            ;
+            });
+            builder = new IdentityBuilder(builder.UserType, typeof(AppRole), builder.Services);
+            builder.AddSignInManager<SignInManager<AppUser>>();
+            builder.AddEntityFrameworkStores<AppIdentityDbContext>();
+            builder.AddRoleManager<RoleManager<AppRole>>();
+            builder.AddRoleValidator<RoleValidator<AppRole>>();
+            builder.AddDefaultTokenProviders();
 
-
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/login"; // path to login page
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -54,10 +52,17 @@ namespace API.Extensions
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Token:Key"])),
                         ValidIssuer = config["Token:Issuer"],
                         ValidateIssuer = true,
-                        ValidateAudience = false
-
+                        ValidateAudience = false,
                     };
-                });
+                })
+                //.AddCookie(IdentityConstants.TwoFactorUserIdScheme, options =>
+                //{
+                //    options.Cookie.Name = "Skinet";
+                //    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                //})
+                ;
+
 //            services.AddAuthorization(options=>options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireRole().);
 
             return services;
