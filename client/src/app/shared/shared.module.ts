@@ -18,6 +18,7 @@ import { NgxGalleryModule } from '@kolkov/ngx-gallery';
 import { PhotoWidgetComponent } from './components/photo-widget/photo-widget.component';
 import { NgxDropzoneModule } from 'ngx-dropzone';
 import { ImageCropperModule } from 'ngx-image-cropper';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 
 @NgModule({
@@ -28,7 +29,7 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     TextInputComponent,
     StepperComponent,
     BasketSummaryComponent,
-    PhotoWidgetComponent
+    PhotoWidgetComponent,
   ],
   imports: [
     FormsModule,
@@ -43,7 +44,8 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     NgxGalleryModule,
     TabsModule.forRoot(),
     NgxDropzoneModule,
-    ImageCropperModule
+    ImageCropperModule,
+    NgxPaginationModule
   ],
   exports: [
     FormsModule,
@@ -63,7 +65,8 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     TabsModule,
     PhotoWidgetComponent,
     NgxDropzoneModule,
-    ImageCropperModule
+    ImageCropperModule,
+    NgxPaginationModule
   ]
 })
 export class SharedModule { }

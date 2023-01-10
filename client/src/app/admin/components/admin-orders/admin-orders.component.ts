@@ -68,4 +68,8 @@ export class AdminOrdersComponent implements OnInit {
     return this.orderStatuses.find(st => { return st.id === statusId }).name;
   }
 
+  findStatusNameByValue(statusValue: string): string {
+    return this.orderStatuses.find(st => { return st.value === statusValue }).name;
+  }
+
 }

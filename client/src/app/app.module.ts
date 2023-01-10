@@ -12,6 +12,12 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingInterceptor } from './core/interceptors/loading.interceptor';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 
+import { registerLocaleData } from '@angular/common';
+import localeRu from '@angular/common/locales/ru';
+import localeUa from '@angular/common/locales/uk';
+registerLocaleData(localeRu, 'ru');
+registerLocaleData(localeUa, 'uk');
+
 @NgModule({
   declarations: [
     AppComponent
@@ -28,7 +34,7 @@ import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
 })

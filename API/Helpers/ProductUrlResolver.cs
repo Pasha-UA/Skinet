@@ -23,7 +23,7 @@ namespace API.Helpers
 
             if (photo!=null)
             {
-                return _config["ApiUrl"] + photo.PictureUrl;
+                return /*_config["ApiUrl"] + */photo.PictureUrl;
             }
 
             return null;

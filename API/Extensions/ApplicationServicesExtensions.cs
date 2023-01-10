@@ -1,5 +1,6 @@
 using API.Errors;
 using Core.Interfaces;
+using Core.Specifications;
 using Infrastructure.Data;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -37,6 +38,9 @@ namespace API.Extensions
 
                 };
             });
+            services.AddSingleton<IEmailService, EmailService>();
+
+
             return services;
         }
     }

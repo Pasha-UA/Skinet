@@ -23,7 +23,7 @@ namespace API.Errors
             {
                 400 => "A bad request",
                 401 => "You are not authorized",
-                403 => "Forbidden from doing this, you are",
+                403 => "You are forbidden from doing this",
                 404 => "Resource not found",
                 500 => "Internal server error",
                 _ => null

@@ -23,6 +23,8 @@ namespace Core.Entities.OrderAggregate
         [EnumStringAttribute("Принят в обработку")]
         Accepted,
 
+        [EnumStringAttribute("Выполнен")]
+        Complete,
     }
 
     public class OrderStatusDto

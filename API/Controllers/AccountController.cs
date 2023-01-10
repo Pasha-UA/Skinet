@@ -4,6 +4,7 @@ using API.Extensions;
 using AutoMapper;
 using Core.Entities.Identity;
 using Core.Interfaces;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +17,17 @@ namespace API.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
+        private readonly IEmailService _emailService;
+
+        public AccountController(
+            UserManager<AppUser> userManager, 
+            SignInManager<AppUser> signInManager, 
+            ITokenService tokenService, 
+            IMapper mapper,
+            IEmailService emailService)
         {
             _mapper = mapper;
+            _emailService = emailService;
             _tokenService = tokenService;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -31,10 +40,21 @@ namespace API.Controllers
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null) return Unauthorized(new ApiResponse(401));
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            //            var res = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
+            //var req = _signInManager.Options.SignIn.RequireConfirmedEmail;
+            //var r2 = user.EmailConfirmed;
+            var result = await _signInManager.PasswordSignInAsync(user, loginDto.Password, true, false);
 
+            if (!result.Succeeded)
+            {
+                if (!user.EmailConfirmed && _signInManager.Options.SignIn.RequireConfirmedEmail) 
+                {
+                    return Unauthorized(new ApiResponse(401, "Email is not confirmed"));
+                } // result Requires2FA should be "true". can't sure why it is not
+
+                return Unauthorized(new ApiResponse(401));
+            }
 
             return new UserDto
             {
@@ -109,7 +129,16 @@ namespace API.Controllers
             
             if (!result.Succeeded) return BadRequest(new ApiResponse(400));
 
-            var roleAddResult = await _userManager.AddToRoleAsync(user, "Member");
+            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = Redirect(Url.PageLink(pageName: "/Account/ConfirmEmail", values: new { userId = user.Id, token = confirmationToken }));
+            await _emailService.SendAsync("opt@mobileplus.com.ua",
+                user.Email,
+                "Confirm your email",
+                $"Follow the link to confirm email: {confirmationLink.Url}");
+
+
+
+            var roleAddResult = await _userManager.AddToRoleAsync(user, "User");
             
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
             

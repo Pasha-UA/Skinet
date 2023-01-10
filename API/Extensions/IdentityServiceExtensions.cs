@@ -16,12 +16,34 @@ namespace API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-            var builder = services.AddIdentityCore<AppUser>();
-            builder = new IdentityBuilder(builder.UserType, typeof(AppRole), builder.Services);
-            builder.AddEntityFrameworkStores<AppIdentityDbContext>();
-            builder.AddSignInManager<SignInManager<AppUser>>();
-            builder.AddRoleValidator<RoleValidator<AppRole>>();
-            builder.AddRoleManager<RoleManager<AppRole>>();
+            //var builder = services.AddIdentityCore<AppUser>();
+            //builder = new IdentityBuilder(builder.UserType, typeof(AppRole), builder.Services);
+            //builder.AddEntityFrameworkStores<AppIdentityDbContext>();
+            //builder.AddSignInManager<SignInManager<AppUser>>();
+            //builder.AddRoleValidator<RoleValidator<AppRole>>();
+            //builder.AddRoleManager<RoleManager<AppRole>>();
+
+            services.AddIdentity<AppUser, AppRole>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.User.RequireUniqueEmail = true;
+//                options.SignIn.RequireConfirmedEmail = true;
+
+            })
+            .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddSignInManager<SignInManager<AppUser>>()
+            .AddRoleValidator<RoleValidator<AppRole>>()
+            .AddRoleManager<RoleManager<AppRole>>()
+//            .AddDefaultTokenProviders()
+            ;
+
+
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
