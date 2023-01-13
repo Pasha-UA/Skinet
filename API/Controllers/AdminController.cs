@@ -12,8 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize]
-
     public class AdminController : BaseApiController
     {
         private readonly IAdminService _adminService;
@@ -31,6 +29,7 @@ namespace API.Controllers
         }
 
         [HttpGet("orders")]
+//        [Authorize(Policy = "AdminOnly")]
         public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrders()
         {
             var orders = await _adminService.GetOrdersAsync();
@@ -39,7 +38,8 @@ namespace API.Controllers
 
 
         [HttpPut("order/{id}")]
-        [Authorize(Roles = "Admin")]
+        //        [Authorize(Roles = "Admin")]
+        [Authorize(Policy ="AdminOnly")]
         public async Task<ActionResult<Order>> UpdateOrderStatus(int id, [FromQuery] string orderStatusId)
         {
             var orderStatus = (OrderStatus)_orderService.GetOrderStatuses().Statuses.First(s => s.Id == int.Parse(orderStatusId)).Id;
