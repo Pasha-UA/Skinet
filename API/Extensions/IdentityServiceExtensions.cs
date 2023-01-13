@@ -16,27 +16,7 @@ namespace API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-//             var builder = services.AddIdentity<AppUser, AppRole>(options=> 
-//             {
-//                 options.Password.RequiredLength = 8;
-//                 options.Password.RequireUppercase = true;
-//                 options.Password.RequireLowercase = true;
-
-//                 options.Lockout.MaxFailedAccessAttempts = 5;
-//                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-
-//                 options.User.RequireUniqueEmail = true;
-// //                options.SignIn.RequireConfirmedEmail = true;
-
-//             });
-//             builder = new IdentityBuilder(builder.UserType, typeof(AppRole), builder.Services);
-//             builder.AddEntityFrameworkStores<AppIdentityDbContext>();
-//             builder.AddSignInManager<SignInManager<AppUser>>();
-//             builder.AddRoleValidator<RoleValidator<AppRole>>();
-//             builder.AddRoleManager<RoleManager<AppRole>>();
-//             builder.AddUserManager<UserManager<AppUser>>();
-
-            services.AddIdentity<AppUser, AppRole>(options=> 
+            services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.Password.RequiredLength = 8;
                 options.Password.RequireUppercase = true;
@@ -46,7 +26,7 @@ namespace API.Extensions
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
                 options.User.RequireUniqueEmail = true;
-//                options.SignIn.RequireConfirmedEmail = true;
+                //options.SignIn.RequireConfirmedEmail = true;
 
             })
             .AddEntityFrameworkStores<AppIdentityDbContext>()
@@ -55,8 +35,13 @@ namespace API.Extensions
             .AddRoleManager<RoleManager<AppRole>>()
             .AddUserManager<UserManager<AppUser>>();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })                
+            .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -67,31 +52,10 @@ namespace API.Extensions
                         ValidateAudience = false
 
                     };
-                })
-                .AddCookie(IdentityConstants.TwoFactorUserIdScheme, options =>
-                {
-                   options.Cookie.Name = "Skinet";
-                   options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                });
+                
+            services.AddAuthorizationPolicies();
 
-                })
-                ;
-//                        services.AddAuthorization(options=>options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireRole());
-
-
-
-            services.AddAuthorization(options =>
-            {
-                var AdminRoles = new string[] { "Admin", "Manager" };
-                options.AddPolicy("AdminOnly",
-                    policy => policy.RequireRole(roles: AdminRoles));
-                options.AddPolicy("ManagerOnly",
-                    policy => policy.RequireRole("Manager"));
-                 options.AddPolicy("AdminRoleClaim", policy => 
-                    policy.RequireClaim("Role", "Admin"));  
-            });
-
-
-            //            services.AddAuthorization(options=>options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireRole().);
 
             return services;
         }
