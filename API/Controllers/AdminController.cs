@@ -7,6 +7,7 @@ using API.Dtos;
 using AutoMapper;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
+using Infrastructure.Identity.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,8 +39,13 @@ namespace API.Controllers
 
 
         [HttpPut("order/{id}")]
-        //        [Authorize(Roles = "Admin")]
-        [Authorize(Policy ="AdminOnly")]
+        // [Authorize]
+//                [Authorize(Roles = "Admin")]
+//[Authorize(Policy ="AdminRoleClaim")]
+//[Authorize(Roles ="Admin")]
+//[Authorization(Roles: "Admin")]
+
+//        [Authorize(Policy ="AdminOnly")]
         public async Task<ActionResult<Order>> UpdateOrderStatus(int id, [FromQuery] string orderStatusId)
         {
             var orderStatus = (OrderStatus)_orderService.GetOrderStatuses().Statuses.First(s => s.Id == int.Parse(orderStatusId)).Id;
@@ -48,7 +54,7 @@ namespace API.Controllers
             if (order == null)
             {
                 _logger.LogError("Error updating order status");
-                return (BadRequest("Не удалось обновить статус"));
+                return (BadRequest("РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ СЃС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р°"));
             }
 
             _logger.LogInformation("Order {0} status updated {1}", id, orderStatus);

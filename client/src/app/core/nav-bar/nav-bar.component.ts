@@ -14,6 +14,12 @@ export class NavBarComponent implements OnInit {
   basket$: Observable<IBasket>;
   currentUser$: Observable<IUser>;
   isAdmin$: Observable<boolean>;
+  localesList = [
+    { code: 'en-US', label: 'English' },
+    { code: 'ru', label: 'Русский' },
+    { code: 'uk', label: 'Українська' },
+  ]
+  currentLocale = 'uk';
 
   constructor(private basketService: BasketService, private accountService: AccountService) { }
 
@@ -27,4 +33,7 @@ export class NavBarComponent implements OnInit {
     this.accountService.logout();
   }
 
+  onLocaleChange(event: any){
+    //TODO: add logics
+  }
 }

@@ -1,26 +1,234 @@
 [
   {
-    "Id": 1,
-    "Name": "Angular"
+    "Name": "Acer",
+    "Id": 1
   },
   {
-    "Id": 2,
-    "Name": "NetCore"
+    "Name": "Ainol",
+    "Id": 2
   },
   {
-    "Id": 3,
-    "Name": "VS Code"
+    "Name": "Alcatel",
+    "Id": 3
   },
   {
-    "Id": 4,
-    "Name": "React"
+    "Name": "Apple iPad",
+    "Id": 4
   },
   {
-    "Id": 5,
-    "Name": "Typescript"
+    "Name": "Apple iPhone",
+    "Id": 5
   },
   {
-    "Id": 6,
-    "Name": "Redis"
+    "Name": "Apple iPod",
+    "Id": 6
+  },
+  {
+    "Name": "Apple Watch",
+    "Id": 7
+  },
+  {
+    "Name": "Archos",
+    "Id": 8
+  },
+  {
+    "Name": "Asus",
+    "Id": 9
+  },
+  {
+    "Name": "Aurora",
+    "Id": 10
+  },
+  {
+    "Name": "Avalanche",
+    "Id": 11
+  },
+  {
+    "Name": "Basson",
+    "Id": 12
+  },
+  {
+    "Name": "BD",
+    "Id": 13
+  },
+  {
+    "Name": "Belkin",
+    "Id": 14
+  },
+  {
+    "Name": "BRAVIS",
+    "Id": 15
+  },
+  {
+    "Name": "CAT",
+    "Id": 16
+  },
+  {
+    "Name": "DELL",
+    "Id": 17
+  },
+  {
+    "Name": "Digma",
+    "Id": 18
+  },
+  {
+    "Name": "DNS",
+    "Id": 19
+  },
+  {
+    "Name": "Doogee",
+    "Id": 20
+  },
+  {
+    "Name": "Explay",
+    "Id": 21
+  },
+  {
+    "Name": "Fly",
+    "Id": 22
+  },
+  {
+    "Name": "Goclever",
+    "Id": 23
+  },
+  {
+    "Name": "HP",
+    "Id": 24
+  },
+  {
+    "Name": "HTC",
+    "Id": 25
+  },
+  {
+    "Name": "Huawei",
+    "Id": 26
+  },
+  {
+    "Name": "ICOO",
+    "Id": 27
+  },
+  {
+    "Name": "ImPad",
+    "Id": 28
+  },
+  {
+    "Name": "Irbis",
+    "Id": 29
+  },
+  {
+    "Name": "JBL",
+    "Id": 30
+  },
+  {
+    "Name": "Leagoo",
+    "Id": 31
+  },
+  {
+    "Name": "Lenovo",
+    "Id": 32
+  },
+  {
+    "Name": "LG",
+    "Id": 33
+  },
+  {
+    "Name": "Meizu",
+    "Id": 34
+  },
+  {
+    "Name": "Microsoft",
+    "Id": 35
+  },
+  {
+    "Name": "Motorola",
+    "Id": 36
+  },
+  {
+    "Name": "Nokia",
+    "Id": 37
+  },
+  {
+    "Name": "Nomi",
+    "Id": 38
+  },
+  {
+    "Name": "Onda",
+    "Id": 39
+  },
+  {
+    "Name": "Philips",
+    "Id": 40
+  },
+  {
+    "Name": "Pipo",
+    "Id": 41
+  },
+  {
+    "Name": "Prestigio",
+    "Id": 42
+  },
+  {
+    "Name": "Reellex",
+    "Id": 43
+  },
+  {
+    "Name": "Ritmix",
+    "Id": 44
+  },
+  {
+    "Name": "Samsung",
+    "Id": 45
+  },
+  {
+    "Name": "Siemens",
+    "Id": 46
+  },
+  {
+    "Name": "Sony",
+    "Id": 47
+  },
+  {
+    "Name": "Sony Ericsson",
+    "Id": 48
+  },
+  {
+    "Name": "Sony PSP, Playstation",
+    "Id": 49
+  },
+  {
+    "Name": "S-Tell",
+    "Id": 50
+  },
+  {
+    "Name": "Supra",
+    "Id": 51
+  },
+  {
+    "Name": "Texet",
+    "Id": 52
+  },
+  {
+    "Name": "THL",
+    "Id": 53
+  },
+  {
+    "Name": "UMI",
+    "Id": 54
+  },
+  {
+    "Name": "Unknown",
+    "Id": 55
+  },
+  {
+    "Name": "Vodafone",
+    "Id": 56
+  },
+  {
+    "Name": "Xiaomi",
+    "Id": 57
+  },
+  {
+    "Name": "ZTE",
+    "Id": 58
   }
 ]

@@ -1,3 +1,4 @@
+
 using DocumentFormat.OpenXml;
 using System.ComponentModel;
 using System.Linq;
@@ -22,7 +23,9 @@ namespace Core.Entities.OrderAggregate
         //[EnumMember(Value = "Принят в обработку")]
         [EnumStringAttribute("Принят в обработку")]
         Accepted,
-
+        
+        [EnumStringAttribute("Выполнен")]
+        Complete,
     }
 
     public class OrderStatusDto

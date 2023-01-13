@@ -4,6 +4,13 @@
   "newProjectRoot": "projects",
   "projects": {
     "client": {
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "ru": "src/i18n/messages.ru.xlf",
+          "uk": "src/i18n/messages.uk.xlf"
+        }
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +24,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/client",
+            "outputPath": "dist/",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -39,6 +46,12 @@
             "scripts": []
           },
           "configurations": {
+            "ru": {
+              "localize": ["ru"]
+            },
+            "uk": {
+              "localize": ["uk"]
+            },
             "production": {
               "budgets": [
                 {
@@ -79,6 +92,12 @@
             "ssl": true
           },
           "configurations": {
+            "ru": {
+              "browserTarget": "client:build:development,ru"
+            },
+            "uk": {
+              "browserTarget": "client:build:development,uk"
+            },
             "production": {
               "browserTarget": "client:build:production"
             },
@@ -91,7 +110,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "client:build"
+            "browserTarget": "client:build:ru"
           }
         },
         "test": {

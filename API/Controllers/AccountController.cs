@@ -7,6 +7,7 @@ using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Infrastructure.Services;
 
 namespace API.Controllers
 {
@@ -16,14 +17,21 @@ namespace API.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
+        private readonly IEmailService _emailService;
+        public AccountController(
+            UserManager<AppUser> userManager, 
+            SignInManager<AppUser> signInManager, 
+            ITokenService tokenService, 
+            IMapper mapper,
+            IEmailService emailService)
         {
             _mapper = mapper;
+            _emailService = emailService;
             _tokenService = tokenService;
             _userManager = userManager;
             _signInManager = signInManager;
-
         }
+
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
@@ -33,6 +41,7 @@ namespace API.Controllers
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
+//            if (result.RequiresTwoFactor)
             if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
 
 
@@ -109,8 +118,10 @@ namespace API.Controllers
             
             if (!result.Succeeded) return BadRequest(new ApiResponse(400));
 
-            var roleAddResult = await _userManager.AddToRoleAsync(user, "Member");
+            var roleAddResult = await _userManager.AddToRoleAsync(user, "User");
             
+            
+
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
             
             return new UserDto

@@ -57,23 +57,14 @@ namespace Infrastructure.Identity
 
 
                 };
-                
-                var roles = new List<AppRole>
-                {
-                    new AppRole {Name = "Admin"},
-                    new AppRole {Name = "Member"}
-                };
 
-                foreach (var role in roles)
-                {
-                    await roleManager.CreateAsync(role);
-                }
+                await SeedRolesAsync(roleManager);
 
 
                 foreach (var user in users)
                 {
                     await userManager.CreateAsync(user, "Pa$$w0rd");
-                    await userManager.AddToRoleAsync(user, "Member");
+                    await userManager.AddToRoleAsync(user, "User");
                     if (user.Email == "admin@test.com") await userManager.AddToRoleAsync(user, "Admin");
                 };
 

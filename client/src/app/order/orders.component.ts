@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AdminService } from '../admin/admin.service';
 import { IOrder } from '../shared/models/order';
 import { OrdersService } from './orders.service';
 
@@ -10,7 +11,7 @@ import { OrdersService } from './orders.service';
 export class OrdersComponent implements OnInit {
   orders: IOrder[];
 
-  constructor(private ordersService: OrdersService) { }
+  constructor(private ordersService: OrdersService, private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.getOrders();
