@@ -26,14 +26,18 @@ namespace API.Extensions
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
                 options.User.RequireUniqueEmail = true;
-                //options.SignIn.RequireConfirmedEmail = true;
+//                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedEmail = true;
 
             })
             .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddDefaultTokenProviders()
             .AddSignInManager<SignInManager<AppUser>>()
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddRoleManager<RoleManager<AppRole>>()
-            .AddUserManager<UserManager<AppUser>>();
+            .AddUserManager<UserManager<AppUser>>()
+//            .AddUserConfirmation<UserConfirmation<AppUser>>()
+            ;
 
             services.AddAuthentication(options =>
             {

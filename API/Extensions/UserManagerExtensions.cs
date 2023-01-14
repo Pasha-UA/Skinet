@@ -24,7 +24,6 @@ namespace API.Extensions
         {
             var email = user.FindFirstValue(ClaimTypes.Email); // new syntax
             return await input.Users.SingleOrDefaultAsync(x=> x.Email==email);
-
         }
     }
 }

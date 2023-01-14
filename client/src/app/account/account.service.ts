@@ -39,18 +39,35 @@ export class AccountService {
     );
   }
 
-  login(values: any) {
+  // login(values: any) {
+  //   return this.http.post(this.baseUrl + 'account/login', values).pipe(
+  //     map((user: IUser) => {
+  //       if (user) {
+  //         localStorage.setItem('token', user.token);
+  //         this.currentUserSource.next(user);
+  //         this.isAdminSource.next(this.isAdmin(user.token));
+  //       }
+  //     })
+  //   );
+  // }
+  
+  login(values: any, redirectTo: string = '') {
     return this.http.post(this.baseUrl + 'account/login', values).pipe(
       map((user: IUser) => {
-        if (user) {
+        console.log(user);
+        if (user && user.token) {
           localStorage.setItem('token', user.token);
           this.currentUserSource.next(user);
           this.isAdminSource.next(this.isAdmin(user.token));
+          console.log(redirectTo);
+        } else {
+          console.log(redirectTo);
+          this.router.navigate([redirectTo]);
         }
       })
     );
   }
-  
+
   register(values: any) {
     return this.http.post(this.baseUrl + 'account/register', values).pipe(
       map((user: IUser) => {
@@ -71,6 +88,7 @@ export class AccountService {
       }
     }
   }
+
   logout() {
     localStorage.removeItem('token');
     this.currentUserSource.next(null);

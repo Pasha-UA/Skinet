@@ -19,9 +19,9 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         public AccountController(
-            UserManager<AppUser> userManager, 
-            SignInManager<AppUser> signInManager, 
-            ITokenService tokenService, 
+            UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
+            ITokenService tokenService,
             IMapper mapper,
             IEmailService emailService)
         {
@@ -38,20 +38,41 @@ namespace API.Controllers
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null) return Unauthorized(new ApiResponse(401));
+            if (!CanSignIn(user))
+            {
+//                return Unauthorized(new ApiResponse(401, "User Email is not confirmed"));
+                return Redirect("/api/account/LoginTwoFactor");
+            }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-//            if (result.RequiresTwoFactor)
             if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
 
-
-            return new UserDto
+            var userDto =  new UserDto
             {
                 Email = user.Email,
                 Token = await _tokenService.CreateToken(user),
                 DisplayName = user.DisplayName
             };
+            return Ok(userDto);
         }
+
+        [HttpGet("logintwofactor")]
+        public async Task<ActionResult<UserDto>> LoginTwoFactor(LoginDto loginDto)
+        {
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+
+            var securityCode = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+
+//            await _emailService.SendAsync("opt@mobileplus.com.ua", user.Email, "Enter security code", $"Please use this code as OTP: {securityCode}");
+
+//            this.EmailMFA.SecurityCode = string.Empty;
+//            this.EmailMFA.RememberMe = rememberMe;
+            return Ok(securityCode);
+
+        }
+
+
 
         [Authorize]
         [HttpGet]
@@ -73,7 +94,7 @@ namespace API.Controllers
             return await _userManager.FindByEmailAsync(email) != null;
         }
 
-        [Authorize(Roles = "Admin")]        
+        [Authorize(Roles = "Admin")]
         [HttpGet("address")]
         public async Task<ActionResult<AddressDto>> GetUserAddressAsync()
         {
@@ -90,8 +111,8 @@ namespace API.Controllers
 
             user.Address = _mapper.Map<AddressDto, Address>(address);
             var result = await _userManager.UpdateAsync(user);
-            if (result.Succeeded) return Ok(_mapper.Map<Address,AddressDto>(user.Address));
-            
+            if (result.Succeeded) return Ok(_mapper.Map<Address, AddressDto>(user.Address));
+
             return BadRequest("Problem updating the user");
 
         }
@@ -103,10 +124,9 @@ namespace API.Controllers
 
             if (CheckEmailExistsAsync(registerDto.Email).Result.Value)
             {
-                return new BadRequestObjectResult(new ApiValidationErrorResponse{Errors=new []{"Email is in use"}});
+                return new BadRequestObjectResult(new ApiValidationErrorResponse { Errors = new[] { "Email is in use" } });
             }
 
-            
             var user = new AppUser
             {
                 DisplayName = registerDto.DisplayName,
@@ -115,15 +135,15 @@ namespace API.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
-            
+
             if (!result.Succeeded) return BadRequest(new ApiResponse(400));
 
             var roleAddResult = await _userManager.AddToRoleAsync(user, "User");
-            
-            
+
+
 
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
-            
+
             return new UserDto
             {
                 DisplayName = user.DisplayName,
@@ -132,5 +152,12 @@ namespace API.Controllers
             };
         }
 
-    }
+         private bool CanSignIn(AppUser user)
+        {
+            if (!_signInManager.Options.SignIn.RequireConfirmedEmail) return true;
+            else if (user.EmailConfirmed) return true;
+            return false;
+        }
+
+   }
 }

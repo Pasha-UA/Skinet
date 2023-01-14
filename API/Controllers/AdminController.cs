@@ -30,13 +30,12 @@ namespace API.Controllers
         }
 
         [HttpGet("orders")]
-        //        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrders()
         {
             var orders = await _adminService.GetOrdersAsync();
             return Ok(_mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders));
         }
-
 
         [HttpPut("order/{id}")]
         [Authorize(Roles = "Admin, Manager")]

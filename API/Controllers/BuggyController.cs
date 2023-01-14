@@ -36,6 +36,7 @@ namespace API.Controllers
 
             return Ok();
         }
+
         [HttpGet("servererror")]
         public ActionResult GetServerError()
         {
@@ -44,6 +45,7 @@ namespace API.Controllers
 
             return Ok();
         }
+
         [HttpGet("badrequest")]
         public ActionResult GetBadRequest()
         {
