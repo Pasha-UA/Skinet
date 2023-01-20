@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, map, of, ReplaySubject } from 'rxjs';
+import { map, Observable, of, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IAddress } from '../shared/models/address';
 import { IUser } from '../shared/models/user';
@@ -18,7 +18,6 @@ export class AccountService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
-
   loadCurrentUser(token: string) {
     if (token === null) {
       this.currentUserSource.next(null);
@@ -28,7 +27,7 @@ export class AccountService {
     let headers = new HttpHeaders();
     headers = headers.set('Authorization', `Bearer ${token}`);
 
-    return this.http.get(this.baseUrl + 'account', {headers}).pipe(
+    return this.http.get(this.baseUrl + 'account', { headers }).pipe(
       map((user: IUser) => {
         if (user) {
           localStorage.setItem('token', user.token);
@@ -39,45 +38,62 @@ export class AccountService {
     );
   }
 
-  // login(values: any) {
-  //   return this.http.post(this.baseUrl + 'account/login', values).pipe(
+  login(values: any): Observable<IUser> {
+    return this.http.post(this.baseUrl + 'account/login', values).pipe(
+      map((user: IUser) => {
+        if (!user.emailConfirmationRequired) {
+          localStorage.setItem('token', user.token);
+          this.currentUserSource.next(user);
+          this.isAdminSource.next(this.isAdmin(user.token));
+        }
+        else {
+          console.log('Email is not activated');
+          this.currentUserSource.next(user);
+        }
+        return user;
+      })
+    );
+  }
+
+// add email activation on register
+  // register(values: any) {
+  //   return this.http.post(this.baseUrl + 'account/register', values).pipe(
   //     map((user: IUser) => {
   //       if (user) {
   //         localStorage.setItem('token', user.token);
   //         this.currentUserSource.next(user);
-  //         this.isAdminSource.next(this.isAdmin(user.token));
   //       }
-  //     })
-  //   );
+  //     }));
   // }
-  
-  login(values: any, redirectTo: string = '') {
-    return this.http.post(this.baseUrl + 'account/login', values).pipe(
-      map((user: IUser) => {
-        console.log(user);
-        if (user && user.token) {
-          localStorage.setItem('token', user.token);
-          this.currentUserSource.next(user);
-          this.isAdminSource.next(this.isAdmin(user.token));
-          console.log(redirectTo);
-        } else {
-          console.log(redirectTo);
-          this.router.navigate([redirectTo]);
-        }
-      })
-    );
-  }
 
   register(values: any) {
     return this.http.post(this.baseUrl + 'account/register', values).pipe(
       map((user: IUser) => {
+        if (!user.emailConfirmationRequired) {
+          localStorage.setItem('token', user.token);
+          this.isAdminSource.next(this.isAdmin(user.token));
+        }
+        else {
+          console.log('Email is not activated');
+        }
+        return user;
+      }));
+  }
+
+
+  emailConfirmation(email: string) {
+    return this.http.get(this.baseUrl + 'account/emailconfirmation?email=' + email);
+  }
+
+  emailConfirm(values: any){
+    return this.http.post(this.baseUrl + 'account/emailconfirm', values).pipe(
+      map((user: IUser) => {
         if (user) {
           localStorage.setItem('token', user.token);
           this.currentUserSource.next(user);
+          this.isAdminSource.next(this.isAdmin(user.token));
         }
-      }
-      )
-    );
+      }));  
   }
 
   isAdmin(token: string): boolean {

@@ -14,7 +14,7 @@ namespace API.Controllers
     public class AccountController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
+        protected readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
@@ -38,38 +38,72 @@ namespace API.Controllers
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null) return Unauthorized(new ApiResponse(401));
-            if (!CanSignIn(user))
-            {
-//                return Unauthorized(new ApiResponse(401, "User Email is not confirmed"));
-                return Redirect("/api/account/LoginTwoFactor");
-            }
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+            if (!isPasswordCorrect) return Unauthorized(new ApiResponse(401));
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            // if (EmailConfirmationRequired(user))
+            // {
 
-            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
+            //                List<string> errorMessages = new List<string>();
+            //                errorMessages.Add("User Email is not confirmed");
+            //                if (canSignIn.PhoneConfirmationRequired) errorMessages.Add("User Phone number is not confirmed");
+            //                if (await _signInManager.UserManager.IsLockedOutAsync(user)) errorMessages.Add("User is blocked"); 
+            //                return Unauthorized(new ApiResponse(401, errorMessages));
+            // }
 
-            var userDto =  new UserDto
-            {
-                Email = user.Email,
-                Token = await _tokenService.CreateToken(user),
-                DisplayName = user.DisplayName
-            };
+            //var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            //            var result = await _signInManager.PasswordSignInAsync(user, loginDto.Password, false, false);
+            //            if (!EmailConfirmationRequired(user)) await _signInManager.SignInAsync(user, true);
+
+            //            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
+
+            var emailConfirmationRequired = EmailConfirmationRequired(user);
+            var userDto = await CreateUserDto(user, emailConfirmationRequired);
+
             return Ok(userDto);
         }
 
-        [HttpGet("logintwofactor")]
-        public async Task<ActionResult<UserDto>> LoginTwoFactor(LoginDto loginDto)
+        [HttpGet("emailconfirmation")]
+        public async Task<ActionResult<UserDto>> EmailConfirmationGet([FromQuery] string email)
         {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            var securityCode = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+            var securityCode = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
 
-//            await _emailService.SendAsync("opt@mobileplus.com.ua", user.Email, "Enter security code", $"Please use this code as OTP: {securityCode}");
+            //            await _emailService.SendAsync("opt@mobileplus.com.ua", user.Email, "Enter security code", $"Please use this code as OTP: {securityCode}");
 
-//            this.EmailMFA.SecurityCode = string.Empty;
-//            this.EmailMFA.RememberMe = rememberMe;
+            //            this.EmailMFA.SecurityCode = string.Empty;
+            //            this.EmailMFA.RememberMe = rememberMe;
             return Ok(securityCode);
+        }
 
+        [HttpPost("emailconfirm")]
+        public async Task<ActionResult> EmailConfirmationPost(LoginEmailConfirmationDto confirmationDto)
+        {
+            //            var r = await _signInManager.TwoFactorSignInAsync(TokenOptions.DefaultEmailProvider, confirmationDto.ConfirmationCode, confirmationDto.RememberMe, true);
+
+            var user = await _userManager.FindByEmailAsync(confirmationDto.Email);
+            if (user != null)
+            {
+                var result = await _signInManager.UserManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider, confirmationDto.ConfirmationCode);
+                if (result == true)
+                {
+                    // sign in, All is ok
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                    await _signInManager.SignInAsync(user, confirmationDto.RememberMe);
+                    var userDto = await CreateUserDto(user, false);
+                    return Ok(userDto);
+                }
+                else
+                {
+                    return Unauthorized(new ApiResponse(401, "Wrong confirmation code. Try again"));
+                }
+            }
+            return Unauthorized(new ApiResponse(401, "User not found"));
+            //            var Succeeded = r.Succeeded;
+
+            //            return Ok(123);
         }
 
 
@@ -144,20 +178,57 @@ namespace API.Controllers
 
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
 
-            return new UserDto
-            {
-                DisplayName = user.DisplayName,
-                Token = await _tokenService.CreateToken(user),
-                Email = user.Email
-            };
+            var emailConfirmationRequired = EmailConfirmationRequired(user);
+            var userDto = await CreateUserDto(user, emailConfirmationRequired);
+
+            return userDto; // new UserDto{
+            // {
+            //     DisplayName = user.DisplayName,
+            //     Token = await _tokenService.CreateToken(user),
+            //     Email = user.Email
+            // };
         }
 
-         private bool CanSignIn(AppUser user)
+        private bool EmailConfirmationRequired(AppUser user)
         {
-            if (!_signInManager.Options.SignIn.RequireConfirmedEmail) return true;
-            else if (user.EmailConfirmed) return true;
-            return false;
+            if (_signInManager.Options.SignIn.RequireConfirmedEmail) return false;
+            else if (user.EmailConfirmed) return false;
+            return true;
         }
 
-   }
+        // class CanSignIn
+        // {
+        //     public bool SignInAllowed { get; } = true;
+        //     public bool EmailConfirmationRequired { get; } = false;
+        //     public bool PhoneConfirmationRequired { get; } = false;
+        //     //            public bool AccountConfirmationRequired { get; } = false;
+        //     //            public bool AccountLocked {get;} = false;
+
+        //     public CanSignIn(AppUser user, SignInManager<AppUser> signInManager)
+        //     {
+        //         EmailConfirmationRequired = signInManager.Options.SignIn.RequireConfirmedEmail ? user.EmailConfirmed ? false : true : false;
+        //         PhoneConfirmationRequired = signInManager.Options.SignIn.RequireConfirmedPhoneNumber ? user.PhoneNumberConfirmed ? false : true : false;
+        //         var a = signInManager.UserManager.IsPhoneNumberConfirmedAsync(user);
+        //         //                AccountConfirmationRequired = signInManager.Options.SignIn.RequireConfirmedAccount ? user. ? false : true : false;
+        //         SignInAllowed = !EmailConfirmationRequired && !PhoneConfirmationRequired;
+        //     }
+
+        // }
+        private async Task<UserDto> CreateUserDto(AppUser user, bool emailConfirmationRequired)
+        {
+            var userDto = new UserDto
+            {
+                Email = user.Email,
+                DisplayName = user.DisplayName,
+                EmailConfirmationRequired = emailConfirmationRequired,
+                Token = emailConfirmationRequired ? "" : await _tokenService.CreateToken(user),
+            };
+
+            return userDto;
+        }
+
+
+    }
+
+
 }

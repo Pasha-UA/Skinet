@@ -17,12 +17,12 @@ namespace API.Errors
             StatusCode = statusCode;
             Message = message ?? GetDefaultMessageForStatusCode(statusCode);
         }
-        public ApiResponse(int statusCode, string[] messageArray = null)
+        public ApiResponse(int statusCode, IEnumerable<string> messages = null)
         {
             StatusCode = statusCode;
-            if (messageArray != null && messageArray.Length > 0)
+            if (messages != null && messages.Any())
             {
-                Message = string.Join("\n", messageArray);
+                Message = string.Join("\n", messages);
             }
             else GetDefaultMessageForStatusCode(statusCode);
         }

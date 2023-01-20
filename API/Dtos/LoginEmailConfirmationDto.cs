@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace API.Dtos
 {
-    public class LoginDto
+    public class LoginEmailConfirmationDto
     {
         public string Email { get; set; }
-        public string Password { get; set; }
+        public string ConfirmationCode { get; set; }
         public bool RememberMe {get; set;} = true;
     }
 }

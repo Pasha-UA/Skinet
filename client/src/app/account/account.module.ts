@@ -4,7 +4,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { AccountRoutingModule } from './account-routing.module';
 import { SharedModule } from '../shared/shared.module';
-import { LoginTwoFactorComponent } from './logintwofactor/logintwofactor.component';
+import { EmailConfirmationComponent } from './emailconfirmation/emailconfirmation.component';
 
 
 
@@ -12,7 +12,7 @@ import { LoginTwoFactorComponent } from './logintwofactor/logintwofactor.compone
   declarations: [
     LoginComponent,
     RegisterComponent,
-    LoginTwoFactorComponent
+    EmailConfirmationComponent
   ],
   imports: [
     CommonModule,

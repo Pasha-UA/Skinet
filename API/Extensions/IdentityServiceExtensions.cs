@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Entities.Identity;
+using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,7 @@ namespace API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
+
             services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.Password.RequiredLength = 8;
@@ -26,8 +28,10 @@ namespace API.Extensions
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
                 options.User.RequireUniqueEmail = true;
-//                options.SignIn.RequireConfirmedAccount = true;
-                options.SignIn.RequireConfirmedEmail = true;
+
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
 
             })
             .AddEntityFrameworkStores<AppIdentityDbContext>()
@@ -36,7 +40,7 @@ namespace API.Extensions
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddRoleManager<RoleManager<AppRole>>()
             .AddUserManager<UserManager<AppUser>>()
-//            .AddUserConfirmation<UserConfirmation<AppUser>>()
+            //            .AddUserConfirmation<UserConfirmation<AppUser>>()
             ;
 
             services.AddAuthentication(options =>
@@ -44,7 +48,7 @@ namespace API.Extensions
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })                
+            })
             .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -57,7 +61,7 @@ namespace API.Extensions
 
                     };
                 });
-                
+
             services.AddAuthorizationPolicies();
 
 
