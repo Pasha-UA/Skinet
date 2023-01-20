@@ -4,15 +4,19 @@
             <div class="text-center mb-4">
                 <h1 class="h3 mb-3 fw-normal">Enter confirmation code:</h1>
             </div>
-            <!-- <app-text-input formControlName="email" [label]="'Email Address'"></app-text-input> -->
             <app-text-input formControlName="confirmationCode" [label]="'Code'"></app-text-input>
             <div class="row form-check mb-2">
-                <div class="col-2">
+                <div class="col-6">
                     <input type="checkbox" formControlName="rememberMe" class="form-check-input" />
-                    <label class="form-check-label" >Remember me</label>
+                    <label class="form-check-label">Remember me</label>
                 </div>
             </div>
-            <button [disabled]="confirmForm.invalid" class="btn btn-lg btn-primary btn-block" type="submit">Confirm</button>
+            <div class="row">
+                <button [disabled]="confirmForm.invalid" class="btn btn-lg btn-primary btn-block my-2"
+                    type="submit">Confirm</button>
+                <button class="btn btn-lg btn-block btn-info" type="button" (click)="onResendConfirmationCode()">Resend
+                    confirmation code</button>
+            </div>
         </form>
     </div>
 </div>

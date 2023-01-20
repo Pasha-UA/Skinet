@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AsyncValidatorFn, FormBuilder, FormGroup, NG_ASYNC_VALIDATORS, Validators } from '@angular/forms';
+import { AsyncValidatorFn, FormBuilder, FormControl, FormGroup, NG_ASYNC_VALIDATORS, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map, of, switchMap, timer } from 'rxjs';
 import { AccountService } from '../account.service';
@@ -12,11 +12,16 @@ import { AccountService } from '../account.service';
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup
   errors: string[];
+  returnUrl: string;
+  emailConfirmationUrl: string
 
   constructor(private fb: FormBuilder, private accountService: AccountService, private router: Router) { }
 
   ngOnInit(): void {
     this.createRegisterForm();
+    this.emailConfirmationUrl = 'account/emailconfirmation';
+    this.returnUrl = '/shop';
+ 
   }
 
   createRegisterForm() {
@@ -26,7 +31,8 @@ export class RegisterComponent implements OnInit {
         [Validators.required, Validators.pattern('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')],
         [this.validateEmailNotTaken()]
       ],
-      password: [null, [Validators.required]]
+      password: [null, [Validators.required]],
+      rememberMe: new FormControl(true)      
     });
   }
 
@@ -50,8 +56,17 @@ export class RegisterComponent implements OnInit {
   onSubmit() {
     this.accountService.register(this.registerForm.value).subscribe(
       {
-        next: response => {
-          this.router.navigateByUrl('/shop');
+        next: (user) => {
+//          this.router.navigateByUrl('/shop');
+          if (user.emailConfirmationRequired) {
+            this.router.navigateByUrl(
+              this.router.createUrlTree(
+                [this.emailConfirmationUrl], { queryParams: { email: user.email, rememberMe: this.registerForm.get("rememberMe").value, returnUrl: this.returnUrl  } }));
+          }
+          else {
+            this.router.navigateByUrl(this.returnUrl);
+          }
+ 
         },
         error: error => {
           console.log(error);

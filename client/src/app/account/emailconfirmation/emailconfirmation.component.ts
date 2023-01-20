@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../account.service';
 
 @Component({
@@ -14,7 +15,10 @@ export class EmailConfirmationComponent implements OnInit {
   rememberMe: boolean;
   returnUrl: string;
 
-  constructor(private accountService: AccountService, private router: Router, private activatedRoute: ActivatedRoute) { }
+  constructor(private accountService: AccountService, 
+              private router: Router, 
+              private activatedRoute: ActivatedRoute,
+              private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.email = this.activatedRoute.snapshot.queryParams.email;
@@ -35,8 +39,14 @@ export class EmailConfirmationComponent implements OnInit {
   onSubmit() {
     this.accountService.emailConfirm(this.confirmForm.value).subscribe({
       next: () => {
+        this.toastr.success("Your email is confirmed successfully");
         this.router.navigateByUrl(this.returnUrl);
       }
     })
+  }
+
+  onResendConfirmationCode() {
+    this.accountService.emailConfirmation(this.email);
+    this.toastr.success("New email confirmation code is sent");
   }
 }

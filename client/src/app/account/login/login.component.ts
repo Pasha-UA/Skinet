@@ -34,7 +34,6 @@ export class LoginComponent implements OnInit {
     this.accountService.login(this.loginForm.value).subscribe(
       {
         next: (user) => {
-          
           if (user.emailConfirmationRequired) {
             this.router.navigateByUrl(
               this.router.createUrlTree(

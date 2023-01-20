@@ -1,0 +1,6 @@
+1) --DONE-- email confirmation redirect on register
+2) --DONE-- add "resend confirmation code" on email confirmation
+3) add password reset
+4) add email change
+5) add logics for "rememberMe" checkBox on login and emailConfirmation page, add to register page as well
+6) 

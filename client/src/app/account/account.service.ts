@@ -55,17 +55,6 @@ export class AccountService {
     );
   }
 
-// add email activation on register
-  // register(values: any) {
-  //   return this.http.post(this.baseUrl + 'account/register', values).pipe(
-  //     map((user: IUser) => {
-  //       if (user) {
-  //         localStorage.setItem('token', user.token);
-  //         this.currentUserSource.next(user);
-  //       }
-  //     }));
-  // }
-
   register(values: any) {
     return this.http.post(this.baseUrl + 'account/register', values).pipe(
       map((user: IUser) => {
