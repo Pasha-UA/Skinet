@@ -18,6 +18,11 @@ namespace API.Extensions
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
 
+            // services.Configure<DataProtectionTokenProviderOptions>(options =>
+            // {
+            //     options.TokenLifespan = TimeSpan.FromDays(1);
+            // });
+
             services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.Password.RequiredLength = 8;
@@ -30,7 +35,7 @@ namespace API.Extensions
                 options.User.RequireUniqueEmail = true;
 
                 options.SignIn.RequireConfirmedAccount = false;
-                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedEmail = true;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
 
             })
@@ -40,6 +45,7 @@ namespace API.Extensions
             .AddRoleValidator<RoleValidator<AppRole>>()
             .AddRoleManager<RoleManager<AppRole>>()
             .AddUserManager<UserManager<AppUser>>()
+//            .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultEmailProvider)
             //            .AddUserConfirmation<UserConfirmation<AppUser>>()
             ;
 
@@ -63,7 +69,6 @@ namespace API.Extensions
                 });
 
             services.AddAuthorizationPolicies();
-
 
             return services;
         }

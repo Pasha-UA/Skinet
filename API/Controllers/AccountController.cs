@@ -14,19 +14,23 @@ namespace API.Controllers
     public class AccountController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
-        protected readonly SignInManager<AppUser> _signInManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
+        private readonly IUserRepository _userRepository;
+
         public AccountController(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService,
             IMapper mapper,
-            IEmailService emailService)
+            IEmailService emailService,
+            IUserRepository userRepository)
         {
             _mapper = mapper;
             _emailService = emailService;
+            _userRepository = userRepository;
             _tokenService = tokenService;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -57,7 +61,7 @@ namespace API.Controllers
 
             //            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
 
-            var emailConfirmationRequired = EmailConfirmationRequired(user);
+            var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
             var userDto = await CreateUserDto(user, emailConfirmationRequired);
 
             return Ok(userDto);
@@ -70,6 +74,7 @@ namespace API.Controllers
 
             var securityCode = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
 
+//            var scode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             //            await _emailService.SendAsync("opt@mobileplus.com.ua", user.Email, "Enter security code", $"Please use this code as OTP: {securityCode}");
 
             //            this.EmailMFA.SecurityCode = string.Empty;
@@ -80,8 +85,6 @@ namespace API.Controllers
         [HttpPost("emailconfirm")]
         public async Task<ActionResult> EmailConfirmationPost(LoginEmailConfirmationDto confirmationDto)
         {
-            //            var r = await _signInManager.TwoFactorSignInAsync(TokenOptions.DefaultEmailProvider, confirmationDto.ConfirmationCode, confirmationDto.RememberMe, true);
-
             var user = await _userManager.FindByEmailAsync(confirmationDto.Email);
             if (user != null)
             {
@@ -101,11 +104,7 @@ namespace API.Controllers
                 }
             }
             return Unauthorized(new ApiResponse(401, "User not found"));
-            //            var Succeeded = r.Succeeded;
-
-            //            return Ok(123);
         }
-
 
 
         [Authorize]
@@ -151,7 +150,6 @@ namespace API.Controllers
 
         }
 
-
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
@@ -174,27 +172,19 @@ namespace API.Controllers
 
             var roleAddResult = await _userManager.AddToRoleAsync(user, "User");
 
-
-
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
 
-            var emailConfirmationRequired = EmailConfirmationRequired(user);
+            var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
             var userDto = await CreateUserDto(user, emailConfirmationRequired);
 
-            return userDto; // new UserDto{
-            // {
-            //     DisplayName = user.DisplayName,
-            //     Token = await _tokenService.CreateToken(user),
-            //     Email = user.Email
-            // };
-        }
+            return userDto;        }
 
-        private bool EmailConfirmationRequired(AppUser user)
-        {
-            if (_signInManager.Options.SignIn.RequireConfirmedEmail) return false;
-            else if (user.EmailConfirmed) return false;
-            return true;
-        }
+        // private bool EmailConfirmationRequired(AppUser user)
+        // {
+        //     if (!_signInManager.Options.SignIn.RequireConfirmedEmail) return false;
+        //     else if (user.EmailConfirmed) return false;
+        //     return true;
+        // }
 
         // class CanSignIn
         // {

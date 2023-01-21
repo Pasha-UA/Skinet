@@ -34,6 +34,10 @@ namespace API.Helpers
             CreateMap<Photo, PhotoToReturnDto>()
                 .ForMember(d => d.PictureUrl,
                     o => o.MapFrom<PhotoUrlResolver>());
+            // CreateMap<AppUser, UserDto>()
+            //     .ForMember(u => u.Email, r => r.MapFrom(s => s.Id))
+//                .ForMember(u=>u.Email, r=>MapFrom<userRolesResolver>())
+                ;
 
         }
     }

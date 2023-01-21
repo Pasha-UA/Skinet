@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Entities.Identity;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
 using Core.Specifications;
@@ -29,6 +30,14 @@ namespace Infrastructure.Services
 
             return await _unitOfWork.Repository<Order>().ListAsync(spec);
         }
+
+        // public async Task<IReadOnlyList<AppUser>> GetUsersAsync()
+        // {
+        //     //  var spec = new UsersSpecification();
+
+        //     //  return await _unitOfWork.Repository<AppUser>().ListAsync(spec);
+        //     throw new NotImplementedException();
+        // }
 
         public async Task<Order> UpdateOrderStatusAsync(int orderId, OrderStatus orderStatus)
         {

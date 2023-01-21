@@ -8,6 +8,7 @@ import { AdminOrderSummaryComponent } from './components/admin-order-summary/adm
 import { EditProductComponent } from './components/edit-product/edit-product.component';
 import { EditProductFormComponent } from './components/edit-product-form/edit-product-form.component';
 import { EditProductPhotosComponent } from './components/edit-product-photos/edit-product-photos.component';
+import { AdminUsersComponent } from './components/admin-users/admin-users.component';
 
 
 
@@ -18,7 +19,8 @@ import { EditProductPhotosComponent } from './components/edit-product-photos/edi
     AdminOrderSummaryComponent,
     EditProductComponent,
     EditProductFormComponent,
-    EditProductPhotosComponent
+    EditProductPhotosComponent,
+    AdminUsersComponent
   ],
   imports: [
     CommonModule,

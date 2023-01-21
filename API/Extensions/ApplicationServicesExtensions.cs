@@ -12,6 +12,7 @@ namespace API.Extensions
         {
             services.AddSingleton<IEmailService, EmailService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();

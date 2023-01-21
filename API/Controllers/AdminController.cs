@@ -5,10 +5,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using API.Dtos;
 using AutoMapper;
+using Core.Entities.Identity;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
-using Infrastructure.Identity.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -20,10 +21,21 @@ namespace API.Controllers
         private readonly IMapper _mapper;
 
         private readonly IOrderService _orderService;
+        private readonly IUserRepository _userRepository;
+        private readonly UserManager<AppUser> _userManager;
 
-        public AdminController(ILogger<AdminController> logger, IMapper mapper, IAdminService adminService, IOrderService orderService)
+        public AdminController(
+            ILogger<AdminController> logger,
+            IMapper mapper,
+            IAdminService adminService,
+            IOrderService orderService,
+            IUserRepository userRepository,
+            UserManager<AppUser> userManager
+            )
         {
             _orderService = orderService;
+            _userRepository = userRepository;
+            _userManager = userManager;
             _adminService = adminService;
             _mapper = mapper;
             _logger = logger;
@@ -53,6 +65,46 @@ namespace API.Controllers
             _logger.LogInformation("Order {0} status updated {1}", id, orderStatus);
 
             return Ok(order);
+        }
+
+        // get list of users
+        [HttpGet("users")]
+        [Authorize(Roles ="Admin")]
+        public async Task<ActionResult<IReadOnlyList<UserDto>>> GetUsersAsync()
+        {
+            var usersWithRoles = new List<UserDto>();
+            var roles = _userRepository.GetRolesAsync();
+            var users = _userRepository.GetUsersAsync();
+            var userRoles = _userRepository.GetUserRolesAsync();
+
+            var userRolesJoined = userRoles
+                .Join(roles, ur => ur.RoleId, r => r.Id, (userRoles, roles) => new { RoleId = userRoles.RoleId, UserId = userRoles.UserId, RoleName = roles.Name })
+                .Join(users, r => r.UserId, u => u.Id, (r, u) => new { r.RoleId, r.RoleName, u.Id, u.Email, u.Address, u.UserName, u.DisplayName });
+
+            var userRolesJoinedAndGroupped = userRolesJoined
+                .GroupBy(u => u.Email)
+                .Select(g => g.ToList())
+            ;
+
+            foreach (var grouppedUser in userRolesJoinedAndGroupped)
+            {
+                var grouppedUserEmail = grouppedUser.Select(a => a.Email).First();
+                var user = await _userManager.FindByEmailAsync(grouppedUserEmail);
+                var grouppedUserRoles = grouppedUser.Select(a => new AppRole { Id = a.RoleId, Name = a.RoleName }).ToList();
+                var grouppedUserDisplayName = grouppedUser.Select(a => a.DisplayName).First();
+                var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
+                var userDto = new UserDto
+                {
+                    Email = grouppedUserEmail,
+                    Roles = grouppedUserRoles,
+                    DisplayName = grouppedUserDisplayName,
+                    EmailConfirmationRequired = emailConfirmationRequired,
+                    AccountLocked = (Nullable.Compare(user.LockoutEnd, DateTimeOffset.Now) < 0 && user.LockoutEnabled && user.LockoutEnd != null)
+                };
+                usersWithRoles.Add(userDto);
+            }
+
+            return Ok(usersWithRoles);
         }
 
 
