@@ -19,5 +19,7 @@ namespace API.Dtos
         public bool AccountLocked { get; set; } = false;
         public IEnumerable<AppRole> Roles { get; set; }
 
+        public bool RememberMe {get; set;}
+
     }
 }

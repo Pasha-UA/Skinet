@@ -2,9 +2,9 @@
 2) --DONE-- add "resend confirmation code" on email confirmation
 3) add password reset
 4) add email change
-5) add logics for "rememberMe" checkBox on login, emailConfirmation and register pages
+5) --DONE, token is valid 30days if rememberMe or 3hours if no--  add logics for "rememberMe" checkBox on login, emailConfirmation and register pages
 6) add user profile front&back
 7) add admin/users logics 
-    -- add front-end html
-    DONE -- add backend
+    --DONE-- add front-end html
+    --DONE -- add backend
 8) 

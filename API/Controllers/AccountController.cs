@@ -62,7 +62,7 @@ namespace API.Controllers
             //            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
 
             var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
-            var userDto = await CreateUserDto(user, emailConfirmationRequired);
+            var userDto = await CreateUserDto(user, emailConfirmationRequired, loginDto.RememberMe);
 
             return Ok(userDto);
         }
@@ -95,7 +95,7 @@ namespace API.Controllers
                     user.EmailConfirmed = true;
                     await _userManager.UpdateAsync(user);
                     await _signInManager.SignInAsync(user, confirmationDto.RememberMe);
-                    var userDto = await CreateUserDto(user, false);
+                    var userDto = await CreateUserDto(user, false, confirmationDto.RememberMe);
                     return Ok(userDto);
                 }
                 else
@@ -106,21 +106,20 @@ namespace API.Controllers
             return Unauthorized(new ApiResponse(401, "User not found"));
         }
 
+        // [Authorize]
+        // [HttpGet]
+        // public async Task<ActionResult<UserDto>> GetCurrentUser()
+        // {
+        //     var user = await _userManager.FindByEmailFromClaimsPrincipleAsync(HttpContext.User);
 
-        [Authorize]
-        [HttpGet]
-        public async Task<ActionResult<UserDto>> GetCurrentUser()
-        {
-            var user = await _userManager.FindByEmailFromClaimsPrincipleAsync(HttpContext.User);
-
-            return new UserDto
-            {
-                DisplayName = user.DisplayName,
-                Token = await _tokenService.CreateToken(user),
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber
-            };
-        }
+        //     return new UserDto
+        //     {
+        //         DisplayName = user.DisplayName,
+        //         Token = await _tokenService.CreateToken(user),
+        //         Email = user.Email,
+        //         PhoneNumber = user.PhoneNumber
+        //     };
+        // }
 
         [HttpGet("emailexists")]
         public async Task<ActionResult<bool>> CheckEmailExistsAsync([FromQuery] string email)
@@ -177,7 +176,7 @@ namespace API.Controllers
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
 
             var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
-            var userDto = await CreateUserDto(user, emailConfirmationRequired);
+            var userDto = await CreateUserDto(user, emailConfirmationRequired, registerDto.RememberMe);
 
             return userDto;
         }
@@ -207,15 +206,16 @@ namespace API.Controllers
         //     }
 
         // }
-        private async Task<UserDto> CreateUserDto(AppUser user, bool emailConfirmationRequired)
+        private async Task<UserDto> CreateUserDto(AppUser user, bool emailConfirmationRequired, bool rememberMe)
         {
             var userDto = new UserDto
             {
                 Email = user.Email,
                 DisplayName = user.DisplayName,
                 EmailConfirmationRequired = emailConfirmationRequired,
-                Token = emailConfirmationRequired ? "" : await _tokenService.CreateToken(user),
-                PhoneNumber = user.PhoneNumber
+                Token = emailConfirmationRequired ? "" : await _tokenService.CreateToken(user, rememberMe),
+                PhoneNumber = user.PhoneNumber,
+                RememberMe = rememberMe
             };
 
             return userDto;

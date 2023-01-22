@@ -9,6 +9,7 @@ namespace Core.Entities.Identity
 
         public Address Address { get; set; }
 
+//        public bool RememberMe {get; set;} 
 //        [Required]
 //        public AppRole AppRole { get; set; }
 

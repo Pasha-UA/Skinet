@@ -13,15 +13,17 @@ namespace Infrastructure.Services
     {
         private readonly IConfiguration _config;
         private readonly SymmetricSecurityKey _key;
+        private readonly int _expiresDays;
         private readonly UserManager<AppUser> _userManager;
         public TokenService(IConfiguration config, UserManager<AppUser> userManager)
         {
             _userManager = userManager;
             _config = config;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Token:Key"]));
+            _expiresDays = int.Parse(_config["Token:ExpireDays"]);
         }
 
-        public async Task<string> CreateToken(AppUser user)
+        public async Task<string> CreateToken(AppUser user, bool rememberMe)
         {
             var claims = new List<Claim>
             {
@@ -37,7 +39,7 @@ namespace Infrastructure.Services
             var tokenDescriptor = new SecurityTokenDescriptor 
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
+                Expires = rememberMe ? DateTime.Now.AddDays(_expiresDays) : DateTime.Now.AddHours(3),
                 SigningCredentials = creds,
                 Issuer = _config["Token:Issuer"]
             };
