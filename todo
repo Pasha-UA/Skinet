@@ -7,4 +7,8 @@
 7) add admin/users logics 
     --DONE-- add front-end html
     --DONE -- add backend
-8) 
+8) add Product new fields
+  add database migration
+  update Product API and frontEnd
+  add products import and CRUD
+9) language package
