@@ -20,5 +20,9 @@ namespace API.Dtos
         ErrorMessage = "Password must have 1 Uppercase, 1 Lowercase, 1 number, 1 non alphabetic and at least 6 characters")
         ]
         public string Password { get; set; }
+
+        [Required]
+        [RegularExpression(@"(^[0]+[0-9]{9}$)", ErrorMessage = @"Phone number starts with '0' and contains digits only")]
+        public string PhoneNumber {get; set;}
     }
 }

@@ -13,7 +13,8 @@ export class RegisterComponent implements OnInit {
   registerForm: FormGroup
   errors: string[];
   returnUrl: string;
-  emailConfirmationUrl: string
+  emailConfirmationUrl: string;
+  defaultPhonePrefix: string;
 
   constructor(private fb: FormBuilder, private accountService: AccountService, private router: Router) { }
 
@@ -21,7 +22,7 @@ export class RegisterComponent implements OnInit {
     this.createRegisterForm();
     this.emailConfirmationUrl = 'account/emailconfirmation';
     this.returnUrl = '/shop';
- 
+    this.defaultPhonePrefix = '+380'
   }
 
   createRegisterForm() {
@@ -30,6 +31,11 @@ export class RegisterComponent implements OnInit {
       email: [null,
         [Validators.required, Validators.pattern('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')],
         [this.validateEmailNotTaken()]
+      ],
+      phoneNumber: [null, 
+        [Validators.required
+          , Validators.pattern('^[0]+[0-9]{9}$')
+        ]
       ],
       password: [null, [Validators.required]],
       rememberMe: new FormControl(true)      

@@ -11,6 +11,7 @@ namespace Core.Entities
         public int ProductBrandId { get; set; }
         private readonly List<Photo> _photos = new List<Photo>();
         public IReadOnlyList<Photo> Photos => _photos.AsReadOnly();
+        public List<WholesalePrice> WholesalePrices {get; set;}
 
         public void AddPhoto(string pictureUrl, string fileName, bool isMain = false)
         {

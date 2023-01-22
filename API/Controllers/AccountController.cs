@@ -74,7 +74,7 @@ namespace API.Controllers
 
             var securityCode = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
 
-//            var scode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //            var scode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             //            await _emailService.SendAsync("opt@mobileplus.com.ua", user.Email, "Enter security code", $"Please use this code as OTP: {securityCode}");
 
             //            this.EmailMFA.SecurityCode = string.Empty;
@@ -117,7 +117,8 @@ namespace API.Controllers
             {
                 DisplayName = user.DisplayName,
                 Token = await _tokenService.CreateToken(user),
-                Email = user.Email
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
             };
         }
 
@@ -163,7 +164,8 @@ namespace API.Controllers
             {
                 DisplayName = registerDto.DisplayName,
                 Email = registerDto.Email,
-                UserName = registerDto.Email
+                UserName = registerDto.Email,
+                PhoneNumber = registerDto.PhoneNumber
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -177,7 +179,8 @@ namespace API.Controllers
             var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
             var userDto = await CreateUserDto(user, emailConfirmationRequired);
 
-            return userDto;        }
+            return userDto;
+        }
 
         // private bool EmailConfirmationRequired(AppUser user)
         // {
@@ -212,6 +215,7 @@ namespace API.Controllers
                 DisplayName = user.DisplayName,
                 EmailConfirmationRequired = emailConfirmationRequired,
                 Token = emailConfirmationRequired ? "" : await _tokenService.CreateToken(user),
+                PhoneNumber = user.PhoneNumber
             };
 
             return userDto;

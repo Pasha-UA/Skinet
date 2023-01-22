@@ -1,1 +1,34 @@
-<p>admin-users works!</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-hover" style="cursor: pointer;">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Display Name</th>
+                        <th>Email</th>
+                        <th>Phone number</th>
+                        <th>Roles</th>
+                        <th>Account status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- <tr *ngFor="let order of orders" routerLink="/orders/{{order.id}}"> -->
+                    <tr *ngFor="let user of users">
+                        <td>{{user.displayName}}</td>
+                        <td>{{user.email}}</td>
+                        <td>{{user.phoneNumber}}</td>
+                        <td>
+                            <span *ngFor="let role of user.roles">
+                                {{role.name}}
+                            </span>
+                        </td>
+                        <td>
+                           <span *ngIf="user.accountLocked">Locked</span> 
+                           <span *ngIf="user.emailConfirmationRequired">Email not confirmed</span> 
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

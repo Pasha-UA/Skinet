@@ -79,7 +79,7 @@ namespace API.Controllers
 
             var userRolesJoined = userRoles
                 .Join(roles, ur => ur.RoleId, r => r.Id, (userRoles, roles) => new { RoleId = userRoles.RoleId, UserId = userRoles.UserId, RoleName = roles.Name })
-                .Join(users, r => r.UserId, u => u.Id, (r, u) => new { r.RoleId, r.RoleName, u.Id, u.Email, u.Address, u.UserName, u.DisplayName });
+                .Join(users, r => r.UserId, u => u.Id, (r, u) => new { r.RoleId, r.RoleName, u.Id, u.Email, u.Address, u.UserName, u.DisplayName, u.PhoneNumber });
 
             var userRolesJoinedAndGroupped = userRolesJoined
                 .GroupBy(u => u.Email)
@@ -98,6 +98,7 @@ namespace API.Controllers
                     Email = grouppedUserEmail,
                     Roles = grouppedUserRoles,
                     DisplayName = grouppedUserDisplayName,
+                    PhoneNumber = user.PhoneNumber,
                     EmailConfirmationRequired = emailConfirmationRequired,
                     AccountLocked = (Nullable.Compare(user.LockoutEnd, DateTimeOffset.Now) < 0 && user.LockoutEnabled && user.LockoutEnd != null)
                 };
