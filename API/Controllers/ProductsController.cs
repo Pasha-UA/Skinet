@@ -15,9 +15,11 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         public IMapper _mapper { get; }
         private readonly IPhotoService _photoService;
+        private readonly IProductRepository _productRepository;
 
-        public ProductsController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService)
+        public ProductsController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService, IProductRepository productRepository)
         {
+            _productRepository = productRepository;
             _photoService = photoService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -156,6 +158,49 @@ namespace API.Controllers
 
             return _mapper.Map<Product, ProductToReturnDto>(product);
         }
+
+
+        [HttpPost("import")]
+        [Authorize(Roles = "Admin, Manager")]
+        // change logics for import xml file
+        public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
+        {
+            // read file
+            var file =  await _productRepository.SaveToDiskAsync(importFile);
+
+
+            // deserialize file and make a list of products
+
+            var spec = new ProductsWithTypesAndBrandsSpecification(5);
+            var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
+
+
+            // import changed products to db
+
+
+            // if (photoDto.Photo.Length > 0)
+            // {
+            //     var photo = await _photoService.SaveToDiskAsync(photoDto.Photo);
+
+            //     if (photo != null)
+            //     {
+            //         product.AddPhoto(photo.PictureUrl, photo.FileName);
+
+            //         _unitOfWork.Repository<Product>().Update(product);
+
+            //         var result = await _unitOfWork.Complete();
+
+            //         if (result <= 0) return BadRequest(new ApiResponse(400, "Problem adding photo product"));
+            //     }
+            //     else
+            //     {
+            //         return BadRequest(new ApiResponse(400, "problem saving photo to disk"));
+            //     }
+            // }
+
+            return new ImportFileResultDto {Result="success", ProductsTotal = 100, ProductsUpdateErrorsCount = 5, ProductsUpdateSuccessCount = 90, ProductsCreated = 5};
+        }
+
 
         [HttpDelete("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]

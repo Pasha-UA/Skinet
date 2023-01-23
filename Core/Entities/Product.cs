@@ -4,11 +4,6 @@ namespace Core.Entities
     {
         public string Name { get; set; }
         public string Description { get; set; }
-//        public string ShortDescription { get; set; }
-//        public string BasicUnit { get; set; }
-//        public int Stock { get; set; } = 0;
-//        public string BarCode { get; set; }
-//        public bool Visible {get; set;} = true;
         public decimal Price { get; set; } // change type to 'Price'
         public ProductType ProductType { get; set; }
         public int ProductTypeId { get; set; }
@@ -16,7 +11,6 @@ namespace Core.Entities
         public int ProductBrandId { get; set; }
         private readonly List<Photo> _photos = new List<Photo>();
         public IReadOnlyList<Photo> Photos => _photos.AsReadOnly();
-        public List<Price> WholesalePrices { get; set; }
 
         public void AddPhoto(string pictureUrl, string fileName, bool isMain = false)
         {
@@ -52,6 +46,16 @@ namespace Core.Entities
                 if (currentMain != null) currentMain.IsMain = false;
             }
         }
+
+// new fields
+//        public string ShortDescription { get; set; }
+//        public string BasicUnit { get; set; }
+//        public int Stock { get; set; } = 0;
+//        public string BarCode { get; set; }
+//        public bool Visible {get; set;} = true;
+//        public List<Price> WholesalePrices { get; set; }
+
+//        public List<AdditionalField> AdditionalFields {get;set;}
 
     }
 }

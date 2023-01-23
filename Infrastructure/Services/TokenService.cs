@@ -5,6 +5,7 @@ using Core.Entities.Identity;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services
@@ -28,7 +29,8 @@ namespace Infrastructure.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.GivenName, user.DisplayName)
+                new Claim(ClaimTypes.GivenName, user.DisplayName),
+                new Claim("RememberMe", rememberMe.ToString())
             };
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -36,12 +38,13 @@ namespace Infrastructure.Services
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
-            var tokenDescriptor = new SecurityTokenDescriptor 
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = rememberMe ? DateTime.Now.AddDays(_expiresDays) : DateTime.Now.AddHours(3),
+                Expires = rememberMe ? DateTime.Now.AddDays(_expiresDays) : DateTime.Now.AddHours(int.Parse(_config["Token:ExpireHoursNotRemembered"])),
                 SigningCredentials = creds,
-                Issuer = _config["Token:Issuer"]
+                Audience = _config["Token:Audience"],
+                Issuer = _config["Token:Issuer"],
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -49,7 +52,27 @@ namespace Infrastructure.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
-
         }
+
+        public ClaimsPrincipal ValidateToken(string jwtToken)
+        {
+            IdentityModelEventSource.ShowPII = true;
+
+            SecurityToken validatedToken;
+
+            TokenValidationParameters validationParameters = new TokenValidationParameters();
+
+            validationParameters.ValidateLifetime = true;
+
+            validationParameters.ValidAudience = _config["Token:Audience"];
+            validationParameters.ValidIssuer = _config["Token:Issuer"];
+            validationParameters.IssuerSigningKey = _key;
+
+            ClaimsPrincipal principal = new JwtSecurityTokenHandler().ValidateToken(jwtToken, validationParameters, out validatedToken);
+
+
+            return principal;
+        }
+
     }
 }

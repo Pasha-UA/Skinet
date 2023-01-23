@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Services;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -62,9 +63,8 @@ namespace API.Controllers
             //            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
 
             var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
-            var userDto = await CreateUserDto(user, emailConfirmationRequired, loginDto.RememberMe);
 
-            return Ok(userDto);
+            return await CreateUserDto(user, emailConfirmationRequired, loginDto.RememberMe);
         }
 
         [HttpGet("emailconfirmation")]
@@ -74,7 +74,8 @@ namespace API.Controllers
 
             var securityCode = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
 
-            //            var scode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var scode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
             //            await _emailService.SendAsync("opt@mobileplus.com.ua", user.Email, "Enter security code", $"Please use this code as OTP: {securityCode}");
 
             //            this.EmailMFA.SecurityCode = string.Empty;
@@ -106,20 +107,25 @@ namespace API.Controllers
             return Unauthorized(new ApiResponse(401, "User not found"));
         }
 
-        // [Authorize]
-        // [HttpGet]
-        // public async Task<ActionResult<UserDto>> GetCurrentUser()
-        // {
-        //     var user = await _userManager.FindByEmailFromClaimsPrincipleAsync(HttpContext.User);
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> GetCurrentUser([FromHeader] string Authorization)
+        {
+            var user = await _userManager.FindByEmailFromClaimsPrincipleAsync(HttpContext.User);
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            var token = Authorization.Split(' ',2).Skip(1).First();
+            var rememberMe = (_tokenService.ValidateToken(token).FindFirst("RememberMe").Value.ToLower()=="true");
+            if (identity != null)
+            {
+                var expire = long.Parse(identity.Claims.Where(x => x.Type == "exp").First().Value);
+                if (expire > DateTimeOffset.Now.Ticks)
+                {
 
-        //     return new UserDto
-        //     {
-        //         DisplayName = user.DisplayName,
-        //         Token = await _tokenService.CreateToken(user),
-        //         Email = user.Email,
-        //         PhoneNumber = user.PhoneNumber
-        //     };
-        // }
+                }
+            }
+
+            return await CreateUserDto(user,_userRepository.EmailConfirmationRequired(user),rememberMe);
+        }
 
         [HttpGet("emailexists")]
         public async Task<ActionResult<bool>> CheckEmailExistsAsync([FromQuery] string email)
@@ -127,8 +133,8 @@ namespace API.Controllers
             return await _userManager.FindByEmailAsync(email) != null;
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet("address")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<AddressDto>> GetUserAddressAsync()
         {
             var user = await _userManager.FindUserByClaimsPrincipleWithAddressAsync(HttpContext.User);
@@ -136,8 +142,8 @@ namespace API.Controllers
             return _mapper.Map<Address, AddressDto>(user.Address);
         }
 
-        [Authorize]
         [HttpPut("address")]
+        [Authorize]
         public async Task<ActionResult<AddressDto>> UpdateUserAddress(AddressDto address)
         {
             var user = await _userManager.FindUserByClaimsPrincipleWithAddressAsync(HttpContext.User);
@@ -147,7 +153,6 @@ namespace API.Controllers
             if (result.Succeeded) return Ok(_mapper.Map<Address, AddressDto>(user.Address));
 
             return BadRequest("Problem updating the user");
-
         }
 
         [HttpPost("register")]
@@ -176,9 +181,8 @@ namespace API.Controllers
             if (!roleAddResult.Succeeded) return BadRequest("Failed to add to role");
 
             var emailConfirmationRequired = _userRepository.EmailConfirmationRequired(user);
-            var userDto = await CreateUserDto(user, emailConfirmationRequired, registerDto.RememberMe);
 
-            return userDto;
+            return await CreateUserDto(user, emailConfirmationRequired, registerDto.RememberMe);
         }
 
         // private bool EmailConfirmationRequired(AppUser user)
@@ -206,23 +210,19 @@ namespace API.Controllers
         //     }
 
         // }
+
         private async Task<UserDto> CreateUserDto(AppUser user, bool emailConfirmationRequired, bool rememberMe)
         {
-            var userDto = new UserDto
+            return new UserDto
             {
                 Email = user.Email,
                 DisplayName = user.DisplayName,
                 EmailConfirmationRequired = emailConfirmationRequired,
                 Token = emailConfirmationRequired ? "" : await _tokenService.CreateToken(user, rememberMe),
                 PhoneNumber = user.PhoneNumber,
-                RememberMe = rememberMe
+                RememberMe = rememberMe,
+                Roles = _userRepository.GetRolesForUser(user)
             };
-
-            return userDto;
         }
-
-
     }
-
-
 }

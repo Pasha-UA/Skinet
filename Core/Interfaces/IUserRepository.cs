@@ -13,5 +13,7 @@ namespace Core.Interfaces
         IReadOnlyList<IdentityUserRole<string>> GetUserRolesAsync();
         IReadOnlyList<AppRole> GetRolesAsync();
         bool EmailConfirmationRequired(AppUser user);
+        IEnumerable<AppRole> GetRolesForUser(AppUser user);
+        IEnumerable<AppUser> GetUsersForRole(AppRole role);
     }
 }

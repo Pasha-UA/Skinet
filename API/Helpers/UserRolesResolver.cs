@@ -27,16 +27,16 @@ namespace API.Helpers
             _roleManager = roleManager;
         }
 
-        public async Task<IEnumerable<string>> Resolve(AppUser source, UserDto destination, string destMember, ResolutionContext context)
-        {
-            var userRoles = await _userManager.GetRolesAsync(source);
-            if (userRoles!=null)
-            {
-                return userRoles;
-            }
+        // public async Task<IEnumerable<string>> Resolve(AppUser source, UserDto destination, string destMember, ResolutionContext context)
+        // {
+        //     var userRoles = await _userManager.GetRolesAsync(source);
+        //     if (userRoles!=null)
+        //     {
+        //         return userRoles;
+        //     }
 
-            return null;
-        }
+        //     return null;
+        // }
 
         public IEnumerable<string> Resolve(AppUser source, UserDto destination, IEnumerable<string> destMember, ResolutionContext context)
         {

@@ -48,5 +48,22 @@ namespace Infrastructure.Data
             return true;
         }
 
+        public IEnumerable<AppRole> GetRolesForUser(AppUser user)
+        {
+            return GetUserRolesAsync().Where(x => x.UserId == user.Id)
+                .Join(GetRolesAsync(),ur=>ur.RoleId, r=>r.Id, (ur,r) => r);
+        }
+
+        // public IEnumerable<AppUser> GetUsersForRole(AppRole role)
+        // {
+        //     throw new NotImplementedException();
+        // }
+
+        public IEnumerable<AppUser> GetUsersForRole(AppRole role)
+        {
+            return GetUserRolesAsync().Where(x => x.RoleId == role.Id)
+                .Join(GetUsersAsync(),ur=>ur.UserId, u=>u.Id, (ur,u) => u);
+        }
+        
     }
 }

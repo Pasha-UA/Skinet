@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
@@ -38,5 +39,16 @@ namespace Infrastructure.Data
         {
             return await _context.ProductTypes.ToListAsync();
         }
-    }
+
+        public Task<IFormFile> SaveToDiskAsync(IFormFile importFile)
+        {
+            throw new NotImplementedException();
+        }
+ 
+        public void DeleteFromDisk(ImportFile importFile)
+        {
+            throw new NotImplementedException();
+        }
+
+   }
 }

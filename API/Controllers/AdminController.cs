@@ -69,7 +69,7 @@ namespace API.Controllers
 
         // get list of users
         [HttpGet("users")]
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IReadOnlyList<UserDto>>> GetUsersAsync()
         {
             var usersWithRoles = new List<UserDto>();
@@ -104,10 +104,22 @@ namespace API.Controllers
                 };
                 usersWithRoles.Add(userDto);
             }
-
             return Ok(usersWithRoles);
         }
 
+        [HttpGet("usersforrole")]
+        [Authorize]
+        public ActionResult<IEnumerable<AppUser>> GetUsersForRole([FromQuery] string roleName)
+        {
+//            List<UserDto>
+            List<AppUser> users = new List<AppUser>();
+            var role = _userRepository.GetRolesAsync().SingleOrDefault(r => r.Name.ToLower() == roleName.ToLower(), null);
+            if (role != null)
+            {
+                users.AddRange(_userRepository.GetUsersForRole(role));
+            }
+            return users;
+        }
 
         [HttpGet("orderstatuses")]
         public ActionResult<IReadOnlyList<OrderStatus>> GetOrderStatuses()
