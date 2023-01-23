@@ -54,7 +54,8 @@ namespace Core.Entities
 //        public string BarCode { get; set; }
 //        public bool Visible {get; set;} = true;
 //        public List<Price> WholesalePrices { get; set; }
-
+//        public string CategoryId {get;set;}  
+//        public Category Category {get;set;}  
 //        public List<AdditionalField> AdditionalFields {get;set;}
 
     }

@@ -10,7 +10,7 @@
 8) add Product new fields
   add database migration
   update Product API and frontEnd
-  add products import and CRUD
+  add products import
 9) language pack
 10) AdminController/GetUsersForRole -- change return type to UserDto, add Roles, add Address
 11) 

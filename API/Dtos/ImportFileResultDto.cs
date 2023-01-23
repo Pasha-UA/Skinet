@@ -7,7 +7,7 @@ namespace API.Dtos
 {
     public class ImportFileResultDto
     {
-        public string Result { get; set; }
+        public bool Success { get; set; } = false;
         public int ProductsTotal { get; set; } = 0;
         public int ProductsUpdateSuccessCount { get; set; } = 0;
         public int ProductsUpdateErrorsCount { get; set; } = 0;

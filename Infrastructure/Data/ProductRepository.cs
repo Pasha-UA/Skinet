@@ -40,9 +40,23 @@ namespace Infrastructure.Data
             return await _context.ProductTypes.ToListAsync();
         }
 
-        public Task<IFormFile> SaveToDiskAsync(IFormFile importFile)
+        public async Task<ImportFile> SaveToDiskAsync(IFormFile file)
         {
-            throw new NotImplementedException();
+            var importFile = new ImportFile();
+            if (file.Length > 0)
+            {
+                var fileName = DateTimeOffset.Now.ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine("Content/import", fileName);
+                await using var fileStream = new FileStream(filePath, FileMode.Create);
+                await file.CopyToAsync(fileStream);
+
+                importFile.FileName = fileName;
+                importFile.ImportFileUrl = "import/" + fileName;
+
+                return importFile;
+            }
+
+            return null;
         }
  
         public void DeleteFromDisk(ImportFile importFile)

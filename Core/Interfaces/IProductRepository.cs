@@ -9,7 +9,7 @@ namespace Core.Interfaces
         Task<IReadOnlyList<Product>> GetProductsAsync();
         Task<IReadOnlyList<ProductBrand>> GetProductBrandsAsync();
         Task<IReadOnlyList<ProductType>> GetProductTypesAsync();
-        Task<IFormFile> SaveToDiskAsync(IFormFile importFile);
+        Task<ImportFile> SaveToDiskAsync(IFormFile file);
         void DeleteFromDisk(ImportFile importFile);
 
     }

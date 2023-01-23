@@ -162,17 +162,22 @@ namespace API.Controllers
 
         [HttpPost("import")]
         [Authorize(Roles = "Admin, Manager")]
-        // change logics for import xml file
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
+            var result = new ImportFileResultDto();
             // read file
-            var file =  await _productRepository.SaveToDiskAsync(importFile);
 
+            long size = importFile.Length;
+
+            var file = await _productRepository.SaveToDiskAsync(importFile);
+
+            if (file == null) return new ImportFileResultDto { Success = false };
 
             // deserialize file and make a list of products
 
-            var spec = new ProductsWithTypesAndBrandsSpecification(5);
-            var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
+
+            // var spec = new ProductsWithTypesAndBrandsSpecification(5);
+            // var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
 
 
             // import changed products to db
@@ -198,7 +203,7 @@ namespace API.Controllers
             //     }
             // }
 
-            return new ImportFileResultDto {Result="success", ProductsTotal = 100, ProductsUpdateErrorsCount = 5, ProductsUpdateSuccessCount = 90, ProductsCreated = 5};
+            return result;
         }
 
 
