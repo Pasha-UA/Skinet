@@ -7,6 +7,11 @@ using AutoMapper;
 using API.Errors;
 using API.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
+using System.Xml.Serialization;
+using Infrastructure.Data.Config;
+using System.Data;
+using System.Xml;
 
 namespace API.Controllers
 {
@@ -161,7 +166,7 @@ namespace API.Controllers
 
 
         [HttpPost("import")]
-        [Authorize(Roles = "Admin, Manager")]
+        //   [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
             var result = new ImportFileResultDto();
@@ -171,8 +176,42 @@ namespace API.Controllers
 
             var file = await _productRepository.SaveToDiskAsync(importFile);
 
-            if (file == null) return new ImportFileResultDto { Success = false };
 
+            if (file == null) return new ImportFileResultDto { Success = false };
+            StreamReader sreader = new StreamReader(file.FileName);
+            //            FileStream fileStream = System.IO.File.OpenRead(file.FileName);
+
+            // the following works on .cs file generated with xsd.com /d 
+            // var dataSet = new DataSet();
+            // var obj = dataSet.ReadXml(reader);
+            // var tables = dataSet.Tables;    
+            // var relations = dataSet.Relations;
+            // var schema = dataSet.GetXmlSchema;
+
+
+            // .cs file generated with xsd.com /c key  -- deserialization not working
+            //sreader.ReadLine();
+            //sreader.ReadLine();
+            //sreader.ReadLine();
+
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.DtdProcessing = DtdProcessing.Parse;
+            settings.MaxCharactersFromEntities = 1024;
+
+            XmlReader reader = XmlReader.Create(sreader, settings);
+
+            XmlSerializer xml = new XmlSerializer(typeof(NewDataSet));
+            var can = xml.CanDeserialize(reader);
+
+            NewDataSet data = (NewDataSet)xml.Deserialize(reader);
+
+            //            var obj = (NewDataSet)xml.Deserialize(reader);
+
+
+            reader.Close();
+            sreader.Close();
+
+            //       var offers = await JsonSerializer.DeserializeAsync(fileStream, typeof(ImportFileResultDto));
             // deserialize file and make a list of products
 
 

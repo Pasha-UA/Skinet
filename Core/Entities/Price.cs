@@ -7,11 +7,11 @@ namespace Core.Entities
 {
     public class Price : BaseEntity
     {
-        public int MinOrderQuantity {get; set;}
+        public int Quantity { get; set; }
+        public decimal Value { get; set; }
+        public Currency Currency { get; set; }
+        public string CurrencyId { get; set; }
 
-        public decimal PriceForOne {get; set;} // come up with a suitable name
-
-//        public decimal RoundTo {get; set;}
-        public Currency Currency {get; set;} 
+        public bool IsRetail { get; set; }
     }
 }

@@ -45,12 +45,12 @@ namespace Infrastructure.Data
             var importFile = new ImportFile();
             if (file.Length > 0)
             {
-                var fileName = DateTimeOffset.Now.ToString() + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine("Content/import", fileName);
+                var fileName = DateTimeOffset.Now.Ticks.ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine("wwwroot/import", fileName);
                 await using var fileStream = new FileStream(filePath, FileMode.Create);
                 await file.CopyToAsync(fileStream);
 
-                importFile.FileName = fileName;
+                importFile.FileName = filePath;
                 importFile.ImportFileUrl = "import/" + fileName;
 
                 return importFile;

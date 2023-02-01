@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj": {}
+    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj": {}
   },
   "projects": {
     "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Core\\Core.csproj": {
@@ -40,6 +40,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
             "DocumentFormat.OpenXml": {
               "target": "Package",
               "version": "[2.18.0, )"
@@ -81,14 +85,14 @@
         }
       }
     },
-    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj": {
+    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj",
+        "projectPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\obj\\",
+        "outputPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
