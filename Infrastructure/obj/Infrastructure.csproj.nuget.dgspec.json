@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj": {}
+    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj": {}
   },
   "projects": {
     "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Core\\Core.csproj": {
@@ -42,7 +42,7 @@
           "dependencies": {
             "AutoMapper": {
               "target": "Package",
-              "version": "[12.0.1, )"
+              "version": "[10.1.1, )"
             },
             "DocumentFormat.OpenXml": {
               "target": "Package",
@@ -85,14 +85,14 @@
         }
       }
     },
-    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj": {
+    "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj",
+        "projectPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\obj\\",
+        "outputPath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",

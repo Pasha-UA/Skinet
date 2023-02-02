@@ -6,9 +6,9 @@ namespace Core.Entities
         public string Description { get; set; }
         public decimal Price { get; set; } // change type to 'Price'
         public ProductType ProductType { get; set; }
-        public int ProductTypeId { get; set; }
+        public string ProductTypeId { get; set; }
         public ProductBrand ProductBrand { get; set; }
-        public int ProductBrandId { get; set; }
+        public string ProductBrandId { get; set; }
         private readonly List<Photo> _photos = new List<Photo>();
         public IReadOnlyList<Photo> Photos => _photos.AsReadOnly();
 
@@ -25,13 +25,13 @@ namespace Core.Entities
             _photos.Add(photo);
         }
 
-        public void RemovePhoto(int id)
+        public void RemovePhoto(string id)
         {
             var photo = _photos.Find(x => x.Id == id);
             _photos.Remove(photo);
         }
 
-        public void SetMainPhoto(int id)
+        public void SetMainPhoto(string id)
         {
             var currentMain = _photos.SingleOrDefault(item => item.IsMain);
             foreach (var item in _photos.Where(item => item.IsMain))

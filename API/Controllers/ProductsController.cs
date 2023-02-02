@@ -52,7 +52,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductToReturnDto>> GetProduct(string id)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
 
@@ -96,7 +96,7 @@ namespace API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin, Manager")]
-        public async Task<ActionResult<Product>> UpdateProduct(int id, ProductCreateDto productToUpdate)
+        public async Task<ActionResult<Product>> UpdateProduct(string id, ProductCreateDto productToUpdate)
         {
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
 
@@ -113,16 +113,16 @@ namespace API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct(string id)
         {
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
 
             foreach (var photo in product.Photos)
             {
-                if (photo.Id > 18)
-                {
-                    _photoService.DeleteFromDisk(photo);
-                }
+                // if (photo.Id > 18)
+                // {
+                //     _photoService.DeleteFromDisk(photo);
+                // }
             }
 
             _unitOfWork.Repository<Product>().Delete(product);
@@ -136,7 +136,7 @@ namespace API.Controllers
 
         [HttpPut("{id}/photo")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductToReturnDto>> AddProductPhoto(int id, [FromForm] ProductPhotoDto photoDto)
+        public async Task<ActionResult<ProductToReturnDto>> AddProductPhoto(string id, [FromForm] ProductPhotoDto photoDto)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
@@ -248,7 +248,7 @@ namespace API.Controllers
 
         [HttpDelete("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> DeleteProductPhoto(int id, int photoId)
+        public async Task<ActionResult> DeleteProductPhoto(string id, string photoId)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
@@ -281,7 +281,7 @@ namespace API.Controllers
 
         [HttpPost("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductToReturnDto>> SetMainPhoto(int id, int photoId)
+        public async Task<ActionResult<ProductToReturnDto>> SetMainPhoto(string id, string photoId)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);

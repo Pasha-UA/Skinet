@@ -9,8 +9,8 @@ namespace Core.Interfaces
 {
     public interface IAdminService
     {
-        Task<Order> UpdateOrderStatusAsync(int orderId, OrderStatus orderStatus);
-        Task<Order> GetOrderByIdAsync(int id);
+        Task<Order> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus);
+        Task<Order> GetOrderByIdAsync(string id);
         Task<IReadOnlyList<Order>> GetOrdersAsync();
         // Task<IReadOnlyList<OrderStatus>> GetOrderStatuses(); // for Admin panel
 
