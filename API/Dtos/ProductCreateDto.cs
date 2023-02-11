@@ -6,21 +6,27 @@ namespace API.Dtos
     {
         [Required]
         public string Name { get; set; }
-        
+
         [Required]
         public string Description { get; set; }
-        
+
         [Required]
-        [RegularExpression(@"^\$?([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?$", 
+        [RegularExpression(@"^\$?([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?$",
             ErrorMessage = "Price must be a decimal (e.g 20.30)")]
         public decimal Price { get; set; }
-        
+
         public string PictureUrl { get; set; }
-        
+
         [Required]
-        public int ProductTypeId { get; set; }
-        
+        public string ProductTypeId { get; set; }
+
         [Required]
-        public int ProductBrandId { get; set; }    
+        public string ProductBrandId { get; set; }
+
+        [Required]
+        public string ProductCategoryId { get; set; }
+
+        [Required]
+        public int Stock { get; set; }
     }
 }

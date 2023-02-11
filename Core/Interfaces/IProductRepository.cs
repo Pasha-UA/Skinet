@@ -11,6 +11,7 @@ namespace Core.Interfaces
         Task<IReadOnlyList<ProductType>> GetProductTypesAsync();
         Task<ImportFile> SaveToDiskAsync(IFormFile file);
         void DeleteFromDisk(ImportFile importFile);
+        public Task<bool> UpdatePriceListInDatabase(PriceListForImport file);
 
     }
 }

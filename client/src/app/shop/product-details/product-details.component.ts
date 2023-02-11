@@ -67,7 +67,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   loadProduct() {
-    this.shopServise.getProduct(+this.activatedRoute.snapshot.paramMap.get('id')).subscribe(
+    this.shopServise.getProduct(this.activatedRoute.snapshot.paramMap.get('id')).subscribe(
       {
         next: product => {
           this.product = product;

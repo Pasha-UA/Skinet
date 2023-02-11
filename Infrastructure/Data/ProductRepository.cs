@@ -23,6 +23,7 @@ namespace Infrastructure.Data
             return await _context.Products
                 .Include(p => p.ProductType)
                 .Include(p => p.ProductBrand)
+                .Include(p => p.ProductCategory)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
         }
@@ -32,6 +33,7 @@ namespace Infrastructure.Data
             return await _context.Products
                 .Include(p => p.ProductType)
                 .Include(p => p.ProductBrand)
+                .Include(p => p.ProductCategory)
                 .ToListAsync();
         }
 
@@ -62,6 +64,12 @@ namespace Infrastructure.Data
         public void DeleteFromDisk(ImportFile importFile)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> UpdatePriceListInDatabase(PriceListForImport file)
+        {
+            
+            return true;
         }
 
    }

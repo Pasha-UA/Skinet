@@ -4,6 +4,7 @@ import { map, of } from 'rxjs';
 import { IBrand } from '../shared/models/brand';
 import { IPagination, Pagination } from '../shared/models/pagination';
 import { IProduct } from '../shared/models/product';
+import { ICategory, ICategoryTree } from '../shared/models/productCategory';
 import { IType } from '../shared/models/productType';
 import { ShopParams } from '../shared/models/shopParams';
 
@@ -15,6 +16,8 @@ export class ShopService {
   products: IProduct[] = [];
   brands: IBrand[] = [];
   types: IType[] = [];
+  categories: ICategory[] = [];
+  categoriesTree: ICategoryTree[] = [];
   pagination = new Pagination();
   shopParams = new ShopParams();
 
@@ -24,6 +27,7 @@ export class ShopService {
     if (useCache === false) {
       this.products = [];
     }
+    console.log(this.shopParams);
 
     if (this.products.length > 0 && useCache === true) {
       const pagesReceived = Math.ceil(this.products.length / this.shopParams.pageSize);
@@ -51,6 +55,10 @@ export class ShopService {
       params = params.append('search', this.shopParams.search);
     }
 
+    if (this.shopParams.categoryId) {
+      params = params.append('categoryId', this.shopParams.categoryId);
+    }
+
     params = params.append('sort', this.shopParams.sort);
     params = params.append('pageIndex', this.shopParams.pageNumber.toString());
     params = params.append('pageSize', this.shopParams.pageSize.toString());
@@ -74,7 +82,7 @@ export class ShopService {
   }
 
 
-  getProduct(id: number) {
+  getProduct(id: string) {
     const product = this.products.find(p => p.id === id);
 
     if (product) {
@@ -107,4 +115,67 @@ export class ShopService {
       })
     );
   }
+
+  getCategories() {
+    if (this.categories.length > 0) {
+      return of(this.categories)
+    }
+    return this.http.get<ICategory[]>(this.baseUrl + 'products/categories').pipe(
+      map(response => {
+        this.categories = response;
+        return response;
+      })
+    );
+  }
+
+  getCategoriesTree() {
+    return this.getCategories().pipe(
+      map(categories => {
+        const categoriesMap = new Map(categories.map(c => [c.id, c]));
+        this.categoriesTree = this.buildTree(categoriesMap, null, 0);
+        return this.categoriesTree;
+      })
+    )
+  }
+
+  private buildTree(categoriesMap, parentId, level) {
+    const children: ICategoryTree[] = [];
+    for (const [id, category] of categoriesMap) {
+      if (category.parentId === parentId) {
+        children.push({
+          ...category,
+          level,
+          children: this.buildTree(categoriesMap, id, level + 1)
+        });
+      }
+    }
+    return children;
+  }
+
+  getChildrenCategories(tree: ICategoryTree[], categoryId: string): ICategoryTree[] {
+    for (const node of tree) {
+      if (node.id === categoryId) {
+        return node.children;
+      }
+      const children = this.getChildrenCategories(node.children, categoryId);
+      if (children) {
+        return children;
+      }
+    }
+    return undefined;
+  }
+
+  getChildrenProductsCount(categoryId: string) {
+
+    let params = this.getShopParams();
+    params.categoryId = categoryId;
+    let productsCount = this.getProducts(true).pipe(
+      map(response => { 
+        return response.count 
+      })
+    );
+
+    return productsCount;
+  }
+
 }

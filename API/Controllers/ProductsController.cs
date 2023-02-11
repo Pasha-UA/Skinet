@@ -12,6 +12,8 @@ using System.Xml.Serialization;
 using Infrastructure.Data.Config;
 using System.Data;
 using System.Xml;
+using Core.Entities.Comparers;
+using Core.Entities.PriceListAggregate;
 
 namespace API.Controllers
 {
@@ -63,6 +65,20 @@ namespace API.Controllers
             return _mapper.Map<Product, ProductToReturnDto>(product);
         }
 
+        // [Cached(600)]
+        // [HttpGet()]
+        // [ProducesResponseType(StatusCodes.Status200OK)]
+        // [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        // public async Task<ActionResult<ProductToReturnDto>> GetProductByBarCode([FromQuery]string barCode)
+        // {
+        //     var spec = new ProductsWithTypesAndBrandsSpecification(barCode);
+
+        //     var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
+
+        //     if (product == null) return NotFound(new ApiResponse(404));
+
+        //     return _mapper.Map<Product, ProductToReturnDto>(product);
+        // }
 
         [Cached(1000)]
         [HttpGet("brands")]
@@ -70,6 +86,23 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.Repository<ProductBrand>().ListAllAsync());
         }
+
+        [Cached(1000)]
+        [HttpGet("categories")]
+        public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategories()
+        {
+            return Ok(await _unitOfWork.Repository<ProductCategory>().ListAllAsync());
+        }
+
+        // [Cached(1000)]
+        // [HttpGet("categoriesTree")]
+        // public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategoriesTree()
+        // {
+        //     var categories = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
+
+        //     // TODO: make return as tree ?
+        //     return Ok(categories);
+        // }
 
         [Cached(1000)]
         [HttpGet("types")]
@@ -121,7 +154,7 @@ namespace API.Controllers
             {
                 // if (photo.Id > 18)
                 // {
-                //     _photoService.DeleteFromDisk(photo);
+                _photoService.DeleteFromDisk(photo);
                 // }
             }
 
@@ -129,7 +162,7 @@ namespace API.Controllers
 
             var result = await _unitOfWork.Complete();
 
-            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem deleting product"));
+            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem deleting product photo"));
 
             return Ok();
         }
@@ -172,76 +205,104 @@ namespace API.Controllers
             var result = new ImportFileResultDto();
             // read file
 
-            long size = importFile.Length;
+            try
+            {
+                long size = importFile.Length;
 
-            var file = await _productRepository.SaveToDiskAsync(importFile);
+                var file = await _productRepository.SaveToDiskAsync(importFile);
 
+                if (file == null) return new ImportFileResultDto { Success = false };
 
-            if (file == null) return new ImportFileResultDto { Success = false };
-            StreamReader sreader = new StreamReader(file.FileName);
-            //            FileStream fileStream = System.IO.File.OpenRead(file.FileName);
+                var priceList = new PriceListForImport();
 
-            // the following works on .cs file generated with xsd.com /d 
-            // var dataSet = new DataSet();
-            // var obj = dataSet.ReadXml(reader);
-            // var tables = dataSet.Tables;    
-            // var relations = dataSet.Relations;
-            // var schema = dataSet.GetXmlSchema;
+                if (await priceList.Import(file) == true)
+                {
+                    var categoriesInDb = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
 
+                    foreach (var category in priceList.Categories)
+                    {
+                        if (categoriesInDb == null || !categoriesInDb.Contains(category, new ComparerById<ProductCategory>()))
+                        {
+                            // create new category and save it to DB
+                            _unitOfWork.Repository<ProductCategory>().Add(category);
 
-            // .cs file generated with xsd.com /c key  -- deserialization not working
-            //sreader.ReadLine();
-            //sreader.ReadLine();
-            //sreader.ReadLine();
+                            var res = await _unitOfWork.Complete();
 
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.DtdProcessing = DtdProcessing.Parse;
-            settings.MaxCharactersFromEntities = 1024;
+                            if (res <= 0) result.CategoriesCreateErrorsCount++;
 
-            XmlReader reader = XmlReader.Create(sreader, settings);
+                            result.CategoriesCreated++;
+                        }
+                        else if (categoriesInDb.Contains(category, new ComparerById<ProductCategory>()))
+                        {
+                            var categoryInDb = categoriesInDb.First(c => c.Id == category.Id);
+                            if (category == categoryInDb)
+                            {
+                                // don't update, category not changed
+                                result.CategoriesNotUpdated++;
+                            }
+                            else
+                            {
+                                // category changed, update
+                                _unitOfWork.Repository<ProductCategory>().Update(category);
 
-            XmlSerializer xml = new XmlSerializer(typeof(NewDataSet));
-            var can = xml.CanDeserialize(reader);
+                                var res = await _unitOfWork.Complete();
 
-            NewDataSet data = (NewDataSet)xml.Deserialize(reader);
+                                if (res <= 0) result.CategoriesUpdateErrorsCount++;
 
-            //            var obj = (NewDataSet)xml.Deserialize(reader);
+                                result.CategoriesUpdateSuccessCount++;
+                            }
+                        }
+                    }
 
+                    // import changed products to db
+                    //                await _productRepository.UpdatePriceListInDatabase(priceList);
 
-            reader.Close();
-            sreader.Close();
+                    var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
+                    foreach (var offer in priceList.Offers)
+                    {
+                        //                    var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
+                        var product = _mapper.Map<OfferItem, Product>(offer);
+                        if (productsInDb == null || !productsInDb.Contains(product, new ComparerByExternalId<Product>()))
+                        {
+                            // create new product and save it to DB
+                            product.Id = DateTime.UtcNow.Ticks.ToString();
+                            if (string.IsNullOrEmpty(product.Description)) product.Description = "";
+                            _unitOfWork.Repository<Product>().Add(product);
 
-            //       var offers = await JsonSerializer.DeserializeAsync(fileStream, typeof(ImportFileResultDto));
-            // deserialize file and make a list of products
+                            var res = await _unitOfWork.Complete();
 
+                            if (res <= 0) result.ProductsCreateErrorsCount++;
 
-            // var spec = new ProductsWithTypesAndBrandsSpecification(5);
-            // var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
+                            result.ProductsCreated++;
+                        }
+                        else if (productsInDb.Contains(product, new ComparerByExternalId<Product>()))
+                        {
+                            var productInDb = productsInDb.First(c => c.ExternalId == product.ExternalId);
+                            if (product == productInDb)
+                            {
+                                // don't update, product not changed
+                                result.ProductsNotUpdated++;
+                            }
+                            else
+                            {
+                                // product changed, update
+                                _unitOfWork.Repository<Product>().Update(product);
 
+                                var res = await _unitOfWork.Complete();
 
-            // import changed products to db
+                                if (res <= 0) result.ProductsUpdateErrorsCount++;
 
-
-            // if (photoDto.Photo.Length > 0)
-            // {
-            //     var photo = await _photoService.SaveToDiskAsync(photoDto.Photo);
-
-            //     if (photo != null)
-            //     {
-            //         product.AddPhoto(photo.PictureUrl, photo.FileName);
-
-            //         _unitOfWork.Repository<Product>().Update(product);
-
-            //         var result = await _unitOfWork.Complete();
-
-            //         if (result <= 0) return BadRequest(new ApiResponse(400, "Problem adding photo product"));
-            //     }
-            //     else
-            //     {
-            //         return BadRequest(new ApiResponse(400, "problem saving photo to disk"));
-            //     }
-            // }
-
+                                result.ProductsUpdateSuccessCount++;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Import file error: {0}", e);
+                result.Success = false;
+            }
             return result;
         }
 

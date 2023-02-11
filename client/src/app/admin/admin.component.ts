@@ -16,6 +16,8 @@ export class AdminComponent implements OnInit {
 
   constructor(private shopService: ShopService, private adminService: AdminService) {
     this.shopParams = this.shopService.getShopParams();
+    this.shopParams.search = '';
+//    this.shopParams.pageSize = 20;
   }
   ngOnInit(): void {
     this.getProducts();
@@ -35,6 +37,7 @@ export class AdminComponent implements OnInit {
 
   onPageChanged(event: any) {
     const params = this.shopService.getShopParams();
+    console.log(params);
     if (params.pageNumber !== event) {
       params.pageNumber = event;
       this.shopService.setShopParams(params);
@@ -42,7 +45,7 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  deleteProduct(id: number) {
+  deleteProduct(id: string) {
     this.adminService.deleteProduct(id).subscribe({
       next: (response: any) => {
         this.products.splice(this.products.findIndex(p => p.id === id), 1);

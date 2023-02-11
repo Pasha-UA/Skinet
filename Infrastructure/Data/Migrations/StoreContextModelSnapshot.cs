@@ -119,9 +119,15 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BarCode")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -135,12 +141,20 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("ProductBrandId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ProductCategoryId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ProductTypeId")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductBrandId");
+
+                    b.HasIndex("ProductCategoryId");
 
                     b.HasIndex("ProductTypeId");
 
@@ -158,6 +172,22 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ProductBrands");
+                });
+
+            modelBuilder.Entity("Core.Entities.ProductCategory", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ParentId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("Core.Entities.ProductType", b =>
@@ -262,11 +292,17 @@ namespace Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ProductBrandId");
 
+                    b.HasOne("Core.Entities.ProductCategory", "ProductCategory")
+                        .WithMany()
+                        .HasForeignKey("ProductCategoryId");
+
                     b.HasOne("Core.Entities.ProductType", "ProductType")
                         .WithMany()
                         .HasForeignKey("ProductTypeId");
 
                     b.Navigation("ProductBrand");
+
+                    b.Navigation("ProductCategory");
 
                     b.Navigation("ProductType");
                 });

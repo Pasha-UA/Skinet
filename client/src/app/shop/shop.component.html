@@ -1,7 +1,11 @@
 <div class="container mt-5">
     <div class="row">
-
         <section class="col-3">
+            <div>
+                <h5 class="col text-warning ms-3 mt-3">Products</h5>
+                <app-productcategoriestree (categorySelected)="onCategorySelect($event)"></app-productcategoriestree>
+            </div>
+
             <ng-container *ngIf="types && brands">
                 <h5 class="text-warning ms-3 mt-3">Sort</h5>
                 <select class="form-select mb-3" (change)="onSortSelected($event.target.value)">
@@ -25,6 +29,8 @@
                         {{type.name}}
                     </li>
                 </ul>
+
+
             </ng-container>
         </section>
 
@@ -41,6 +47,14 @@
                 </div>
             </div>
 
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" *ngIf="childrenCategories">
+                <div class="col mb-4">
+                    <div class="card" *ngFor="let subcat of childrenCategories">
+                        <app-product-category-item [category]="subcat"></app-product-category-item>
+                    </div>
+
+                </div>
+            </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                 <div class="col mb-4" *ngFor="let item of products">

@@ -25,7 +25,11 @@ namespace API
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers();
             services.AddDbContext<StoreContext>(x =>
-                x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
+            {
+                x.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+                x.EnableSensitiveDataLogging();
+            });
+
             // services.AddDbContext<AppIdentityDbContext>(x =>
             //     x.UseSqlite(_config.GetConnectionString("IdentityConnection")));
             services.AddDbContext<AppIdentityDbContext>(x =>
