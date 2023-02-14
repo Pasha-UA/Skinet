@@ -10,14 +10,16 @@ import { ShopService } from '../shop.service';
 export class ProductCategoryItemComponent implements OnInit {
   @Input() category: ICategory;
   childProductCount: number;
+  childCategoryCount: number;
 
   constructor(private shopService: ShopService) { }
 
   ngOnInit(): void {
-    console.log(this.category);
     this.shopService.getChildrenProductsCount(this.category.id).subscribe({
       next: response => this.childProductCount=response
-    })
+    });
+
+    this.childCategoryCount = this.shopService.getChildrenCategoriesCount(this.category.id);
   }
 
 }

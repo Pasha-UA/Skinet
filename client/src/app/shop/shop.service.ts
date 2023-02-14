@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { IBrand } from '../shared/models/brand';
 import { IPagination, Pagination } from '../shared/models/pagination';
 import { IProduct } from '../shared/models/product';
@@ -170,12 +170,18 @@ export class ShopService {
     let params = this.getShopParams();
     params.categoryId = categoryId;
     let productsCount = this.getProducts(true).pipe(
-      map(response => { 
-        return response.count 
+      map(response => {
+        return response.count
       })
     );
 
     return productsCount;
+  }
+
+  getChildrenCategoriesCount(categoryId: string) {
+    if (!Array.isArray(this.categories) || !this.categories.length) this.getCategories();
+  
+    return this.categories.filter(c=> c.parentId===categoryId).length
   }
 
 }

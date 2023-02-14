@@ -464,3 +464,7 @@ $RECYCLE.BIN/
 *.db
 *.dll
 *.cml
+
+/client/ssl/*
+*.crt
+*.key

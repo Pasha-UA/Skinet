@@ -87,8 +87,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "sslKey": "ssl/server.key",
-            "sslCert": "ssl/server.crt",
+            "sslKey": "ssl/cert.key",
+            "sslCert": "ssl/cert.crt",
             "ssl": true
           },
           "configurations": {

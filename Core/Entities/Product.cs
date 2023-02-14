@@ -5,7 +5,7 @@ namespace Core.Entities
         public string ExternalId {get; set;} // id in external db. used for import
         public string Name { get; set; }
         public string Description { get; set; }
-        public decimal Price { get; set; } // change type to 'Price'
+        public decimal Price { get; set; } // TODO: change type to 'Price'
         public ProductType ProductType { get; set; }
         public string ProductTypeId { get; set; }
         public ProductBrand ProductBrand { get; set; }

@@ -14,6 +14,7 @@ using System.Data;
 using System.Xml;
 using Core.Entities.Comparers;
 using Core.Entities.PriceListAggregate;
+using System.Security.Cryptography;
 
 namespace API.Controllers
 {
@@ -65,20 +66,6 @@ namespace API.Controllers
             return _mapper.Map<Product, ProductToReturnDto>(product);
         }
 
-        // [Cached(600)]
-        // [HttpGet()]
-        // [ProducesResponseType(StatusCodes.Status200OK)]
-        // [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        // public async Task<ActionResult<ProductToReturnDto>> GetProductByBarCode([FromQuery]string barCode)
-        // {
-        //     var spec = new ProductsWithTypesAndBrandsSpecification(barCode);
-
-        //     var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
-
-        //     if (product == null) return NotFound(new ApiResponse(404));
-
-        //     return _mapper.Map<Product, ProductToReturnDto>(product);
-        // }
 
         [Cached(1000)]
         [HttpGet("brands")]
@@ -117,6 +104,7 @@ namespace API.Controllers
         public async Task<ActionResult<Product>> CreateProduct(ProductCreateDto productToCreate)
         {
             var product = _mapper.Map<ProductCreateDto, Product>(productToCreate);
+            product.Id = _productRepository.GenerateRandomId(10);
 
             _unitOfWork.Repository<Product>().Add(product);
 
@@ -203,12 +191,14 @@ namespace API.Controllers
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
             var result = new ImportFileResultDto();
-            // read file
+
+            var importParameters = new { }; // TODO: add logics for parameters, parameters should come together with import file
 
             try
             {
                 long size = importFile.Length;
 
+                // read file
                 var file = await _productRepository.SaveToDiskAsync(importFile);
 
                 if (file == null) return new ImportFileResultDto { Success = false };
@@ -254,45 +244,57 @@ namespace API.Controllers
                         }
                     }
 
-                    // import changed products to db
-                    //                await _productRepository.UpdatePriceListInDatabase(priceList);
 
+                    // import changed products to db
                     var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
+
+                    // find a list of products presenting in DB but not presenting in import file
+                    var notFoundProducts = new List<Product>();
+                    notFoundProducts.AddRange(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
+                    result.ProductsNotFound = notFoundProducts.Count;
+
                     foreach (var offer in priceList.Offers)
                     {
-                        //                    var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
-                        var product = _mapper.Map<OfferItem, Product>(offer);
-                        if (productsInDb == null || !productsInDb.Contains(product, new ComparerByExternalId<Product>()))
+                        var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
+                        productCreate.ProductBrandId = "1";
+                        productCreate.ProductTypeId = "1";
+                        if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
+                        Product productInDb = null;
+
+                        if (!(productsInDb is null))
+                        {
+                            productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId, null);
+                        }
+
+
+                        if (productInDb is null) // no such product in db
                         {
                             // create new product and save it to DB
-                            product.Id = DateTime.UtcNow.Ticks.ToString();
-                            if (string.IsNullOrEmpty(product.Description)) product.Description = "";
-                            _unitOfWork.Repository<Product>().Add(product);
-
-                            var res = await _unitOfWork.Complete();
-
-                            if (res <= 0) result.ProductsCreateErrorsCount++;
-
-                            result.ProductsCreated++;
-                        }
-                        else if (productsInDb.Contains(product, new ComparerByExternalId<Product>()))
-                        {
-                            var productInDb = productsInDb.First(c => c.ExternalId == product.ExternalId);
-                            if (product == productInDb)
+                            var res = await this.CreateProduct(productCreate);
+                            if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
                             {
-                                // don't update, product not changed
-                                result.ProductsNotUpdated++;
+                                result.ProductsCreated++;
+                            }
+                            else result.ProductsCreateErrorsCount++;
+                        }
+                        else // product exists 
+                        {
+                            productCreate.Id = productInDb.Id;
+
+                            if (!AreEqualProductWithProductCreate(productInDb, productCreate))
+                            {
+                                //TODO: update comparision after price type is updated to 'Price' with array of prices
+                                var res = await this.UpdateProduct(productCreate.Id, productCreate);
+                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                {
+                                    result.ProductsUpdateSuccessCount++;
+                                }
+                                else result.ProductsUpdateErrorsCount++;
                             }
                             else
                             {
-                                // product changed, update
-                                _unitOfWork.Repository<Product>().Update(product);
-
-                                var res = await _unitOfWork.Complete();
-
-                                if (res <= 0) result.ProductsUpdateErrorsCount++;
-
-                                result.ProductsUpdateSuccessCount++;
+                                // don't update, product not changed
+                                result.ProductsNotUpdated++;
                             }
                         }
                     }
@@ -306,6 +308,18 @@ namespace API.Controllers
             return result;
         }
 
+        private bool AreEqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto)
+        {// TODO: Update comparer using all necessary fields
+            return (String.Compare(product.Name, productCreateDto.Name) == 0) &&
+                    (String.Compare(product.Description, productCreateDto.Description) == 0) &&
+                    product.Price == productCreateDto.Price &&
+                    (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0) &&
+                    (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0) &&
+                    (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0) &&
+                    product.Stock == productCreateDto.Stock &&
+                    (String.Compare(product.BarCode, productCreateDto.BarCode) == 0)
+            ;
+        }
 
         [HttpDelete("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]

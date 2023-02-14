@@ -60,7 +60,7 @@ namespace Infrastructure.Data
 
             return null;
         }
- 
+
         public void DeleteFromDisk(ImportFile importFile)
         {
             throw new NotImplementedException();
@@ -68,9 +68,25 @@ namespace Infrastructure.Data
 
         public async Task<bool> UpdatePriceListInDatabase(PriceListForImport file)
         {
-            
+
             return true;
         }
 
-   }
+        public string GenerateRandomId(string chars, int length)
+        {
+            var random = new Random();
+            string uniqueId = new string(
+                Enumerable.Repeat(chars, length)
+                          .Select(s => s[random.Next(s.Length)])
+                          .ToArray());
+            return uniqueId;
+        }
+
+        /// generates random id using parameter length and chars 'abcdefghijklmnopqrstuvwxyz0123456789'
+        public string GenerateRandomId(int length)
+        {
+            string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            return GenerateRandomId(chars, length);
+        }
+    }
 }

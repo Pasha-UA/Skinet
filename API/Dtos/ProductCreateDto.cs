@@ -4,6 +4,9 @@ namespace API.Dtos
 {
     public class ProductCreateDto
     {
+        public string Id { get; set; }
+        public string ExternalId { get; set; }
+
         [Required]
         public string Name { get; set; }
 
@@ -28,5 +31,8 @@ namespace API.Dtos
 
         [Required]
         public int Stock { get; set; }
+        
+        [Required]
+        public string BarCode { get; set; }
     }
 }

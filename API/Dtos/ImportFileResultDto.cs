@@ -15,6 +15,8 @@ namespace API.Dtos
         public int ProductsCreateErrorsCount { get; set; } = 0;
         public int ProductsCreated { get; set; } = 0;
 
+        public int ProductsNotFound { get; set; } = 0;
+
         public int CategoriesCreated { get; set; } = 0;
         public int CategoriesNotUpdated { get; set; } = 0; // not changed
         public int CategoriesUpdateSuccessCount { get; set; } = 0;

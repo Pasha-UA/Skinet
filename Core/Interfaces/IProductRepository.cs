@@ -13,5 +13,9 @@ namespace Core.Interfaces
         void DeleteFromDisk(ImportFile importFile);
         public Task<bool> UpdatePriceListInDatabase(PriceListForImport file);
 
+        /// generates random id using parameter length and chars 'abcdefghijklmnopqrstuvwxyz0123456789'
+        public string GenerateRandomId(int length);
+        public string GenerateRandomId(string chars, int length);
+
     }
 }

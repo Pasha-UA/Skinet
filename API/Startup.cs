@@ -28,6 +28,7 @@ namespace API
             {
                 x.UseSqlite(_config.GetConnectionString("DefaultConnection"));
                 x.EnableSensitiveDataLogging();
+//                x.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
             // services.AddDbContext<AppIdentityDbContext>(x =>
