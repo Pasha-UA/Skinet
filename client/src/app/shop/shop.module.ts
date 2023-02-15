@@ -5,6 +5,9 @@ import { ProductItemComponent } from './product-item/product-item.component';
 import { SharedModule } from '../shared/shared.module';
 import { ProductDetailsComponent } from './product-details/product-details.component';
 import { ShopRoutingModule } from './shop-routing.module';
+import { MatTreeModule } from '@angular/material/tree';
+import { ProductCategoriesTreeComponent } from './product-categories-tree/product-categories-tree.component';
+import { ProductCategoryItemComponent } from './product-category-item/product-category-item.component';
 
 
 
@@ -12,12 +15,15 @@ import { ShopRoutingModule } from './shop-routing.module';
   declarations: [
     ShopComponent,
     ProductItemComponent,
-    ProductDetailsComponent
+    ProductDetailsComponent,
+    ProductCategoriesTreeComponent,
+    ProductCategoryItemComponent
   ],
   imports: [
     CommonModule,
     SharedModule,
-    ShopRoutingModule
+    ShopRoutingModule,
+    MatTreeModule
   ],
   exports: []
 })

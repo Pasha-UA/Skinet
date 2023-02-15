@@ -22,7 +22,7 @@
                         <thead>
                           <tr>
                             <th scope="col">
-                              <div class="p-2">Id</div>
+                              <div class="p-2">Code</div>
                             </th>
                             <th scope="col">
                               <div class="p-2 text-uppercase">Product</div>
@@ -43,7 +43,7 @@
                         </thead>
                         <tbody>
                           <tr *ngFor="let product of products">
-                            <td class="align-middle">{{product.id}}</td>
+                            <td class="align-middle">{{product.barCode}}</td>
                             <td>
                               <div class="p-2">
                                 <img src="{{product.pictureUrl || '/assets/images/placeholder.png'}}"

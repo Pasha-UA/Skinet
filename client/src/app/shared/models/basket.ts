@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 
 export interface IBasketItem {
-    id: number;
+    id: string;
     name: string;
     price: number;
     quantity: number;

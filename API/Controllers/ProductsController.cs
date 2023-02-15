@@ -12,6 +12,9 @@ using System.Xml.Serialization;
 using Infrastructure.Data.Config;
 using System.Data;
 using System.Xml;
+using Core.Entities.Comparers;
+using Core.Entities.PriceListAggregate;
+using System.Security.Cryptography;
 
 namespace API.Controllers
 {
@@ -52,7 +55,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
+        public async Task<ActionResult<ProductToReturnDto>> GetProduct(string id)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
 
@@ -72,6 +75,23 @@ namespace API.Controllers
         }
 
         [Cached(1000)]
+        [HttpGet("categories")]
+        public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategories()
+        {
+            return Ok(await _unitOfWork.Repository<ProductCategory>().ListAllAsync());
+        }
+
+        // [Cached(1000)]
+        // [HttpGet("categoriesTree")]
+        // public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategoriesTree()
+        // {
+        //     var categories = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
+
+        //     // TODO: make return as tree ?
+        //     return Ok(categories);
+        // }
+
+        [Cached(1000)]
         [HttpGet("types")]
         public async Task<ActionResult<IReadOnlyList<ProductType>>> GetProductTypes()
         {
@@ -84,6 +104,7 @@ namespace API.Controllers
         public async Task<ActionResult<Product>> CreateProduct(ProductCreateDto productToCreate)
         {
             var product = _mapper.Map<ProductCreateDto, Product>(productToCreate);
+            product.Id = _productRepository.GenerateRandomId(10);
 
             _unitOfWork.Repository<Product>().Add(product);
 
@@ -96,7 +117,7 @@ namespace API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin, Manager")]
-        public async Task<ActionResult<Product>> UpdateProduct(int id, ProductCreateDto productToUpdate)
+        public async Task<ActionResult<Product>> UpdateProduct(string id, ProductCreateDto productToUpdate)
         {
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
 
@@ -113,30 +134,30 @@ namespace API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct(string id)
         {
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
 
             foreach (var photo in product.Photos)
             {
-                if (photo.Id > 18)
-                {
-                    _photoService.DeleteFromDisk(photo);
-                }
+                // if (photo.Id > 18)
+                // {
+                _photoService.DeleteFromDisk(photo);
+                // }
             }
 
             _unitOfWork.Repository<Product>().Delete(product);
 
             var result = await _unitOfWork.Complete();
 
-            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem deleting product"));
+            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem deleting product photo"));
 
             return Ok();
         }
 
         [HttpPut("{id}/photo")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductToReturnDto>> AddProductPhoto(int id, [FromForm] ProductPhotoDto photoDto)
+        public async Task<ActionResult<ProductToReturnDto>> AddProductPhoto(string id, [FromForm] ProductPhotoDto photoDto)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
@@ -170,85 +191,139 @@ namespace API.Controllers
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
             var result = new ImportFileResultDto();
-            // read file
 
-            long size = importFile.Length;
+            var importParameters = new { }; // TODO: add logics for parameters, parameters should come together with import file
 
-            var file = await _productRepository.SaveToDiskAsync(importFile);
+            try
+            {
+                long size = importFile.Length;
+
+                // read file
+                var file = await _productRepository.SaveToDiskAsync(importFile);
+
+                if (file == null) return new ImportFileResultDto { Success = false };
+
+                var priceList = new PriceListForImport();
+
+                if (await priceList.Import(file) == true)
+                {
+                    var categoriesInDb = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
+
+                    foreach (var category in priceList.Categories)
+                    {
+                        if (categoriesInDb == null || !categoriesInDb.Contains(category, new ComparerById<ProductCategory>()))
+                        {
+                            // create new category and save it to DB
+                            _unitOfWork.Repository<ProductCategory>().Add(category);
+
+                            var res = await _unitOfWork.Complete();
+
+                            if (res <= 0) result.CategoriesCreateErrorsCount++;
+
+                            result.CategoriesCreated++;
+                        }
+                        else if (categoriesInDb.Contains(category, new ComparerById<ProductCategory>()))
+                        {
+                            var categoryInDb = categoriesInDb.First(c => c.Id == category.Id);
+                            if (category == categoryInDb)
+                            {
+                                // don't update, category not changed
+                                result.CategoriesNotUpdated++;
+                            }
+                            else
+                            {
+                                // category changed, update
+                                _unitOfWork.Repository<ProductCategory>().Update(category);
+
+                                var res = await _unitOfWork.Complete();
+
+                                if (res <= 0) result.CategoriesUpdateErrorsCount++;
+
+                                result.CategoriesUpdateSuccessCount++;
+                            }
+                        }
+                    }
 
 
-            if (file == null) return new ImportFileResultDto { Success = false };
-            StreamReader sreader = new StreamReader(file.FileName);
-            //            FileStream fileStream = System.IO.File.OpenRead(file.FileName);
+                    // import changed products to db
+                    var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
 
-            // the following works on .cs file generated with xsd.com /d 
-            // var dataSet = new DataSet();
-            // var obj = dataSet.ReadXml(reader);
-            // var tables = dataSet.Tables;    
-            // var relations = dataSet.Relations;
-            // var schema = dataSet.GetXmlSchema;
+                    // find a list of products presenting in DB but not presenting in import file
+                    var notFoundProducts = new List<Product>();
+                    notFoundProducts.AddRange(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
+                    result.ProductsNotFound = notFoundProducts.Count;
 
+                    foreach (var offer in priceList.Offers)
+                    {
+                        var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
+                        productCreate.ProductBrandId = "1";
+                        productCreate.ProductTypeId = "1";
+                        if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
+                        Product productInDb = null;
 
-            // .cs file generated with xsd.com /c key  -- deserialization not working
-            //sreader.ReadLine();
-            //sreader.ReadLine();
-            //sreader.ReadLine();
-
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.DtdProcessing = DtdProcessing.Parse;
-            settings.MaxCharactersFromEntities = 1024;
-
-            XmlReader reader = XmlReader.Create(sreader, settings);
-
-            XmlSerializer xml = new XmlSerializer(typeof(NewDataSet));
-            var can = xml.CanDeserialize(reader);
-
-            NewDataSet data = (NewDataSet)xml.Deserialize(reader);
-
-            //            var obj = (NewDataSet)xml.Deserialize(reader);
+                        if (!(productsInDb is null))
+                        {
+                            productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId, null);
+                        }
 
 
-            reader.Close();
-            sreader.Close();
+                        if (productInDb is null) // no such product in db
+                        {
+                            // create new product and save it to DB
+                            var res = await this.CreateProduct(productCreate);
+                            if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                            {
+                                result.ProductsCreated++;
+                            }
+                            else result.ProductsCreateErrorsCount++;
+                        }
+                        else // product exists 
+                        {
+                            productCreate.Id = productInDb.Id;
 
-            //       var offers = await JsonSerializer.DeserializeAsync(fileStream, typeof(ImportFileResultDto));
-            // deserialize file and make a list of products
-
-
-            // var spec = new ProductsWithTypesAndBrandsSpecification(5);
-            // var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
-
-
-            // import changed products to db
-
-
-            // if (photoDto.Photo.Length > 0)
-            // {
-            //     var photo = await _photoService.SaveToDiskAsync(photoDto.Photo);
-
-            //     if (photo != null)
-            //     {
-            //         product.AddPhoto(photo.PictureUrl, photo.FileName);
-
-            //         _unitOfWork.Repository<Product>().Update(product);
-
-            //         var result = await _unitOfWork.Complete();
-
-            //         if (result <= 0) return BadRequest(new ApiResponse(400, "Problem adding photo product"));
-            //     }
-            //     else
-            //     {
-            //         return BadRequest(new ApiResponse(400, "problem saving photo to disk"));
-            //     }
-            // }
-
+                            if (!AreEqualProductWithProductCreate(productInDb, productCreate))
+                            {
+                                //TODO: update comparision after price type is updated to 'Price' with array of prices
+                                var res = await this.UpdateProduct(productCreate.Id, productCreate);
+                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                {
+                                    result.ProductsUpdateSuccessCount++;
+                                }
+                                else result.ProductsUpdateErrorsCount++;
+                            }
+                            else
+                            {
+                                // don't update, product not changed
+                                result.ProductsNotUpdated++;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Import file error: {0}", e);
+                result.Success = false;
+            }
             return result;
         }
 
+        private bool AreEqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto)
+        {// TODO: Update comparer using all necessary fields
+            return (String.Compare(product.Name, productCreateDto.Name) == 0) &&
+                    (String.Compare(product.Description, productCreateDto.Description) == 0) &&
+                    product.Price == productCreateDto.Price &&
+                    (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0) &&
+                    (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0) &&
+                    (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0) &&
+                    product.Stock == productCreateDto.Stock &&
+                    (String.Compare(product.BarCode, productCreateDto.BarCode) == 0)
+            ;
+        }
 
         [HttpDelete("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> DeleteProductPhoto(int id, int photoId)
+        public async Task<ActionResult> DeleteProductPhoto(string id, string photoId)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);
@@ -281,7 +356,7 @@ namespace API.Controllers
 
         [HttpPost("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductToReturnDto>> SetMainPhoto(int id, int photoId)
+        public async Task<ActionResult<ProductToReturnDto>> SetMainPhoto(string id, string photoId)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _unitOfWork.Repository<Product>().GetEntityWithSpec(spec);

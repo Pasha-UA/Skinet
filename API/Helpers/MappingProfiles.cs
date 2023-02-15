@@ -7,6 +7,7 @@ using AutoMapper;
 using Core.Entities;
 using Core.Entities.Identity;
 using Core.Entities.OrderAggregate;
+using Core.Entities.PriceListAggregate;
 
 namespace API.Helpers
 {
@@ -17,6 +18,7 @@ namespace API.Helpers
             CreateMap<Product, ProductToReturnDto>()
                 .ForMember(d => d.ProductBrand, o => o.MapFrom(s => s.ProductBrand.Name))
                 .ForMember(d => d.ProductType, o => o.MapFrom(s => s.ProductType.Name))
+                .ForMember(d => d.ProductCategory, o => o.MapFrom(s => s.ProductCategory.Name))
                 .ForMember(d => d.PictureUrl, o => o.MapFrom<ProductUrlResolver>());
             CreateMap<Core.Entities.Identity.Address, AddressDto>().ReverseMap();
             CreateMap<BasketItemDto, BasketItem>();
@@ -31,6 +33,18 @@ namespace API.Helpers
                 .ForMember(d => d.PictureUrl, o => o.MapFrom(s => s.ItemOrdered.PictureUrl))
                 .ForMember(d => d.PictureUrl, o => o.MapFrom<OrderItemUrlResolver>());
             CreateMap<ProductCreateDto, Product>();
+            CreateMap<OfferItem, Product>()
+                .ForMember(d => d.Price, o => o.MapFrom(s => s.RetailPrice))
+                .ForMember(d => d.Stock, o => o.MapFrom(s => s.QuantityInStock))
+                .ForMember(d => d.ProductCategoryId, o => o.MapFrom(s => s.CategoryId))
+                .ForMember(d => d.ExternalId, o => o.MapFrom(s => s.Id))
+                ;
+            CreateMap<OfferItem, ProductCreateDto>()
+                .ForMember(d => d.Price, o => o.MapFrom(s => s.RetailPrice))
+                .ForMember(d => d.Stock, o => o.MapFrom(s => s.QuantityInStock))
+                .ForMember(d => d.ProductCategoryId, o => o.MapFrom(s => s.CategoryId))
+                .ForMember(d => d.ExternalId, o => o.MapFrom(s => s.Id))
+                ;
             CreateMap<Photo, PhotoToReturnDto>()
                 .ForMember(d => d.PictureUrl,
                     o => o.MapFrom<PhotoUrlResolver>());

@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "+Fczuc1FdCxS/KQxYalNKVxOcDHx+CJb2+xQVmJ1Vyk09kphujegGEqusNL72vcgwfbkM5CVbMJdcojiv+v+OA==",
+  "dgSpecHash": "LkAVXokVymmZQuV8GXY5qLqbkM0+FBSBuZwT3WPn80Uxv4wWJN2wMEtAXg77adqGu4LydvJ7qrZtSFve7NBXWg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\infrastructure\\Infrastructure.csproj",
+  "projectFilePath": "C:\\Users\\Admin\\source\\repos\\AngularProjects\\e-commerce\\skinet\\Infrastructure\\Infrastructure.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Admin\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\automapper\\10.1.1\\automapper.10.1.1.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\documentformat.openxml\\2.18.0\\documentformat.openxml.2.18.0.nupkg.sha512",
@@ -94,6 +94,7 @@
     "C:\\Users\\Admin\\.nuget\\packages\\system.memory.data\\1.0.2\\system.memory.data.1.0.2.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\system.reflection\\4.3.0\\system.reflection.4.3.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\system.reflection.emit\\4.7.0\\system.reflection.emit.4.7.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\system.reflection.primitives\\4.3.0\\system.reflection.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\system.resources.resourcemanager\\4.3.0\\system.resources.resourcemanager.4.3.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512",

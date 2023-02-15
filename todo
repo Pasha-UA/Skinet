@@ -8,10 +8,8 @@
     --DONE-- add front-end html
     --DONE -- add backend
 8) add Product new fields
-    - add database migration
     - update Product API and frontEnd
     - add products import 
-      -- fix xml schema "PriceListConfiguration"
 9) language pack
 10) AdminController/GetUsersForRole -- change return type to UserDto, add Roles, add Address
 11) 

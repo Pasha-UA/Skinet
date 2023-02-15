@@ -17,7 +17,7 @@ namespace Infrastructure.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Order> GetOrderByIdAsync(int id)
+        public async Task<Order> GetOrderByIdAsync(string id)
         {
             var spec = new OrdersWithItemsAndOrderingSpecification(id);
 
@@ -39,7 +39,7 @@ namespace Infrastructure.Services
         //     throw new NotImplementedException();
         // }
 
-        public async Task<Order> UpdateOrderStatusAsync(int orderId, OrderStatus orderStatus)
+        public async Task<Order> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
         {
             var spec = new OrdersWithItemsAndOrderingSpecification(orderId);
             var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);

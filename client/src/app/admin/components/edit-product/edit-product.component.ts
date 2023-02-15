@@ -47,8 +47,11 @@ export class EditProductComponent implements OnInit {
 
 
   loadProduct() {
-    this.shopService.getProduct(+this.route.snapshot.paramMap.get('id')).subscribe({
+    console.log('loading product...')
+
+    this.shopService.getProduct(this.route.snapshot.paramMap.get('id')).subscribe({
       next: (response: any) => {
+        console.log(response);
         const productBrandId = this.brands && this.brands.find(x => x.name === response.productBrand).id;
         const productTypeId = this.types && this.types.find(x => x.name === response.productType).id;
         this.product = response;

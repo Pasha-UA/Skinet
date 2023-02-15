@@ -11,6 +11,6 @@ namespace Core.Entities
         public string FileName { get; set; }
         public bool IsMain { get; set; }
         public Product Product { get; set; }
-        public int ProductId { get; set; }
+        public string ProductId { get; set; }
     }
 }
