@@ -128,7 +128,7 @@ namespace Core.Entities
                     RetailPrice = prices.FirstOrDefault(p => p.IsRetail, null).Price,
                     RetailPriceCurrencyId = prices.FirstOrDefault(p => p.IsRetail, null).CurrencyId,
                     PriceItems = prices.Where(p => !p.IsRetail).Any() ? prices.Where(p => !p.IsRetail).ToArray() : null,
-                    SellingType = prices.Where(p => !p.IsRetail).Any() ? "u" : null
+                    SellingType = prices.Where(p => !p.IsRetail).Any() ? "u" : "r"
 
                 };
                 offers.Add(item);
