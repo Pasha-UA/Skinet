@@ -132,6 +132,23 @@ namespace API.Controllers
             return Ok(product);
         }
 
+        private async Task<ActionResult<ProductCategory>> UpdateCategory(ProductCategory categoryToUpdate)
+        {
+            var category = await _unitOfWork.Repository<ProductCategory>().GetByIdAsync(categoryToUpdate.Id);
+            category.Name = categoryToUpdate.Name;
+            category.ParentId = categoryToUpdate.ParentId;
+            //            _mapper.Map(categoryToUpdate, category);
+
+            _unitOfWork.Repository<ProductCategory>().Update(category);
+
+            var result = await _unitOfWork.Complete();
+
+            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating category"));
+
+            return Ok(category);
+        }
+
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteProduct(string id)
@@ -207,11 +224,15 @@ namespace API.Controllers
 
                 if (await priceList.Import(file) == true)
                 {
+                    result.ProductsTotal = priceList.Offers.Count();
+
                     var categoriesInDb = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
 
                     foreach (var category in priceList.Categories)
                     {
-                        if (categoriesInDb == null || !categoriesInDb.Contains(category, new ComparerById<ProductCategory>()))
+
+                        ProductCategory categoryInDb = categoriesInDb.FirstOrDefault(c => c.Id == category.Id) ?? null;
+                        if (categoryInDb is null)
                         {
                             // create new category and save it to DB
                             _unitOfWork.Repository<ProductCategory>().Add(category);
@@ -219,12 +240,10 @@ namespace API.Controllers
                             var res = await _unitOfWork.Complete();
 
                             if (res <= 0) result.CategoriesCreateErrorsCount++;
-
-                            result.CategoriesCreated++;
+                            else result.CategoriesCreated++;
                         }
-                        else if (categoriesInDb.Contains(category, new ComparerById<ProductCategory>()))
+                        else
                         {
-                            var categoryInDb = categoriesInDb.First(c => c.Id == category.Id);
                             if (category == categoryInDb)
                             {
                                 // don't update, category not changed
@@ -233,24 +252,22 @@ namespace API.Controllers
                             else
                             {
                                 // category changed, update
-                                _unitOfWork.Repository<ProductCategory>().Update(category);
+                                var res = await this.UpdateCategory(category);
 
-                                var res = await _unitOfWork.Complete();
-
-                                if (res <= 0) result.CategoriesUpdateErrorsCount++;
-
-                                result.CategoriesUpdateSuccessCount++;
+                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                {
+                                    result.CategoriesUpdateSuccessCount++;
+                                }
+                                else result.CategoriesUpdateErrorsCount++;
                             }
                         }
                     }
-
 
                     // import changed products to db
                     var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
 
                     // find a list of products presenting in DB but not presenting in import file
-                    var notFoundProducts = new List<Product>();
-                    notFoundProducts.AddRange(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
+                    var notFoundProducts = new List<Product>(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
                     result.ProductsNotFound = notFoundProducts.Count;
 
                     foreach (var offer in priceList.Offers)
@@ -259,13 +276,8 @@ namespace API.Controllers
                         productCreate.ProductBrandId = "1";
                         productCreate.ProductTypeId = "1";
                         if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
-                        Product productInDb = null;
 
-                        if (!(productsInDb is null))
-                        {
-                            productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId, null);
-                        }
-
+                        Product productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId) ?? null;
 
                         if (productInDb is null) // no such product in db
                         {
