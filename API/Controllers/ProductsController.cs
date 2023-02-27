@@ -207,7 +207,7 @@ namespace API.Controllers
         //   [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
-            var result = new ImportFileResultDto();
+            var result = new ImportFileResult();
 
             var importParameters = new { }; // TODO: add logics for parameters, parameters should come together with import file
 
@@ -218,7 +218,7 @@ namespace API.Controllers
                 // read file
                 var file = await _productRepository.SaveToDiskAsync(importFile);
 
-                if (file == null) return new ImportFileResultDto { Success = false };
+                if (file == null) return new ImportFileResultDto(false, null);
 
                 var priceList = new PriceListForImport();
 
@@ -293,7 +293,7 @@ namespace API.Controllers
                         {
                             productCreate.Id = productInDb.Id;
 
-                            if (!AreEqualProductWithProductCreate(productInDb, productCreate))
+                            if (!EqualProductWithProductCreate(productInDb, productCreate))
                             {
                                 //TODO: update comparision after price type is updated to 'Price' with array of prices
                                 var res = await this.UpdateProduct(productCreate.Id, productCreate);
@@ -315,12 +315,12 @@ namespace API.Controllers
             catch (Exception e)
             {
                 Console.WriteLine("Import file error: {0}", e);
-                result.Success = false;
+                return new ImportFileResultDto(false, null);
             }
-            return result;
+            return new ImportFileResultDto(true, result);
         }
 
-        private bool AreEqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto)
+        private bool EqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto)
         {// TODO: Update comparer using all necessary fields
             return (String.Compare(product.Name, productCreateDto.Name) == 0) &&
                     (String.Compare(product.Description, productCreateDto.Description) == 0) &&

@@ -48,7 +48,7 @@ namespace Infrastructure.Services
 
             var orders = await _unitOfWork.Repository<Order>().ListAsync(spec);
 
-            var order = orders.FirstOrDefault(o=>o.Id==orderId);
+            var order = orders.FirstOrDefault(o => o.Id == orderId);
 
             if (order == null) return null;
 
