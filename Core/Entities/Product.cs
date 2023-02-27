@@ -1,3 +1,5 @@
+using Core.Entities.PriceListAggregate;
+
 namespace Core.Entities
 {
     public class Product : BaseEntity
@@ -6,6 +8,8 @@ namespace Core.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; } // TODO: change type to 'Price'
+        public List<PriceItem> Prices { get; set; } // TODO: uncomment and add logics
+//        public PriceItem BulkPrice { get; set; } // TODO: uncomment and add logics
         public ProductType ProductType { get; set; }
         public string ProductTypeId { get; set; }
         public ProductBrand ProductBrand { get; set; }

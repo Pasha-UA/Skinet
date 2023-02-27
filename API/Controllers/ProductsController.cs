@@ -322,14 +322,31 @@ namespace API.Controllers
 
         private bool EqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto)
         {// TODO: Update comparer using all necessary fields
-            return (String.Compare(product.Name, productCreateDto.Name) == 0) &&
-                    (String.Compare(product.Description, productCreateDto.Description) == 0) &&
-                    product.Price == productCreateDto.Price &&
-                    (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0) &&
-                    (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0) &&
-                    (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0) &&
-                    product.Stock == productCreateDto.Stock &&
-                    (String.Compare(product.BarCode, productCreateDto.BarCode) == 0)
+            var pricesNotChanged = true;
+            if (product.Prices != null && productCreateDto.Prices != null)
+            {
+                pricesNotChanged = product.Prices.SequenceEqual(productCreateDto.Prices); // TODO: Add comparer for prices! And then uncomment last line in return block
+            }
+            else if (product.Prices == null && productCreateDto.Prices == null)
+            {
+                // Both sequences are null, so the prices have not changed
+                pricesNotChanged = true;
+            }
+            else
+            {
+                // One sequence is null, so the prices have changed
+                pricesNotChanged = false;
+            }
+
+            return (String.Compare(product.Name, productCreateDto.Name) == 0)
+                    && (String.Compare(product.Description, productCreateDto.Description) == 0)
+                    && product.Price == productCreateDto.Price
+                    && (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0)
+                    && (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0)
+                    && (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0)
+                    && product.Stock == productCreateDto.Stock 
+                    && (String.Compare(product.BarCode, productCreateDto.BarCode) == 0) 
+                    // && pricesNotChanged  // TODO: uncomment when price comparer is complete
             ;
         }
 

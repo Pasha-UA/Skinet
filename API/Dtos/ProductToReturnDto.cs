@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Entities.PriceListAggregate;
 
 namespace API.Dtos
 {
@@ -18,5 +19,7 @@ namespace API.Dtos
         public string BarCode { get; set; }
         public string Stock { get; set; }
         public IEnumerable<PhotoToReturnDto> Photos { get; set; }
+        public IEnumerable<PriceItem> Prices { get; set; }
+        public PriceItem BulkPrice { get; set; }
     }
 }

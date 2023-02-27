@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Core.Entities.PriceListAggregate;
 
 namespace API.Dtos
 {
@@ -31,8 +32,12 @@ namespace API.Dtos
 
         [Required]
         public int Stock { get; set; }
-        
+
         [Required]
         public string BarCode { get; set; }
+
+        public IEnumerable<PriceItem> Prices { get; set; }
+       
+        public PriceItem BulkPrice { get; set; }
     }
 }

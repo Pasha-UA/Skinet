@@ -45,6 +45,7 @@ namespace API.Helpers
                 .ForMember(d => d.Stock, o => o.MapFrom(s => s.QuantityInStock))
                 .ForMember(d => d.ProductCategoryId, o => o.MapFrom(s => s.CategoryId))
                 .ForMember(d => d.ExternalId, o => o.MapFrom(s => s.Id))
+                .ForMember(d => d.Prices, o => o.MapFrom(s => s.PriceItems))
                 ;
             CreateMap<Photo, PhotoToReturnDto>()
                 .ForMember(d => d.PictureUrl,
