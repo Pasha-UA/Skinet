@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { IOrderStatus } from 'src/app/shared/models/orderStatus';
 import { IOrder } from 'src/app/shared/models/order';
 import { AdminService } from '../../admin.service';
-import { Observable } from 'rxjs';
+import { tap, map, Observable } from 'rxjs';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import { ToastrService } from 'ngx-toastr';
 
@@ -13,47 +13,53 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AdminOrdersComponent implements OnInit {
   orders: IOrder[];
-  orderStatuses = [];
+  orderStatusList = [];
   orders$: Observable<IOrder>;
 
   constructor(private adminService: AdminService, private toastr: ToastrService,) { }
 
   ngOnInit(): void {
     this.getOrders();
-    this.getOrderStatuses();
+    this.getOrderStatusList();
   }
 
   getOrders() {
     this.orders$ = this.adminService.getOrderList() as Observable<IOrder>;
-    this.adminService.getOrderList().subscribe({
-      next: (orders: IOrder[]) => {
-        this.orders = orders;
-      },
-      error: (e) => console.error(e)
-    });
+    this.adminService.getOrderList()
+      .subscribe({
+        next: (orders: IOrder[]) => {
+          // console.log(orders);
+          this.orders = orders;
+        },
+        error: (e) => console.error(e)
+      });
   }
 
-  getOrderStatuses() {
-    this.adminService.getOrderStatuses().subscribe({
-      next: (response: IOrderStatus[]) => {
-        this.orderStatuses = Object.values(response);
-        // console.log(this.orderStatuses)
-      },
-      error: (e) => {
-        console.log(e);
-      }
-    });
+  getOrderStatusList() {
+    this.adminService.getOrderStatusList()
+      .subscribe({
+        next: (response: IOrderStatus[]) => {
+          this.orderStatusList = response;
+          // console.log(this.orderStatusList)
+        },
+        error: (e) => {
+          console.log(e);
+        }
+      });
 
   }
 
-  onOrderStatusChanged(orderId: string, orderStatus: string) {
+  onOrderStatusChanged(orderId: string, orderStatusValue: string) {
     // if selectedOrder.status !== orderStatus {save new status to db}
 
-    this.adminService.updateOrderStatus(orderId, orderStatus)
+    orderStatusValue = orderStatusValue.split(/[: ]+/).pop();
+    let orderStatusId = this.orderStatusList.find(os => os.value === orderStatusValue).id;
+    this.adminService.updateOrderStatus(orderId, orderStatusId)
       .subscribe({
         next: (response: IOrder) => {
-          const status = this.orderStatuses.find(st => { return st.id === response.status })
-          this.toastr.success(`Order # ${orderId} status modified. New status is ${this.findStatusNameById(response.status)}`);
+          // const status = this.orderStatusList.find(st => { st.id === response.status })
+          // console.log(response)
+          this.toastr.success(`Order # ${orderId} status modified. New status is ${this.findStatusNameById(response.statusId)}`);
 
         },
         error: error => {
@@ -65,10 +71,14 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   findStatusNameById(statusId: string): string {
-    return this.orderStatuses.find(st => { return st.id === statusId }).name;
+//    let status = this.orderStatusList.find(st => { return st.id === statusId })
+    return this.orderStatusList.find(st => { return st.id === statusId }).name;
   }
 
   findStatusNameByValue(statusValue: string): string {
-    return this.orderStatuses.find(st => { return st.value === statusValue }).name;
+    // console.log(statusValue);
+    // let status = this.orderStatusList.find(st => { return st.value === statusValue })
+    // console.log(status);
+    return this.orderStatusList.find(st => { return st.value === statusValue }).name;
   }
 }

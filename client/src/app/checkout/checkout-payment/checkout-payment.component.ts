@@ -47,7 +47,7 @@ export class CheckoutPaymentComponent implements OnInit {
   getOrderToCreate(basket: IBasket) {
     return {
       basketId: basket.id,
-      deliveryMethodId: + this.checkoutForm.get('deliveryForm').get('deliveryMethod').value,
+      deliveryMethodId: this.checkoutForm.get('deliveryForm').get('deliveryMethod').value,
       shipToAddress: this.checkoutForm.get('addressForm').value
     }
   }

@@ -1,6 +1,6 @@
 // still not used
 export interface IOrderStatus {
-    id: number;
+    id: string;
     name: string;
     value: string;
 }

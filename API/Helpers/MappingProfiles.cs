@@ -26,7 +26,8 @@ namespace API.Helpers
             CreateMap<AddressDto, Core.Entities.OrderAggregate.Address>();
             CreateMap<Order, OrderToReturnDto>()
                 .ForMember(d => d.DeliveryMethod, o => o.MapFrom(s => s.DeliveryMethod.ShortName))
-                .ForMember(d => d.ShippingPrice, o => o.MapFrom(s => s.DeliveryMethod.Price));
+                .ForMember(d => d.ShippingPrice, o => o.MapFrom(s => s.DeliveryMethod.Price))
+                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.Value));
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(d => d.ProductId, o => o.MapFrom(s => s.ItemOrdered.ProductItemId))
                 .ForMember(d => d.ProductName, o => o.MapFrom(s => s.ItemOrdered.ProductName))
@@ -50,7 +51,7 @@ namespace API.Helpers
                     o => o.MapFrom<PhotoUrlResolver>());
             CreateMap<AppUser, UserDto>()
                 .ForMember(u => u.Email, r => r.MapFrom(s => s.Id))
-//               .ForMember(u=>u.Email, r=>MapFrom<userRolesResolver>())
+                //               .ForMember(u=>u.Email, r=>MapFrom<userRolesResolver>())
                 ;
 
         }

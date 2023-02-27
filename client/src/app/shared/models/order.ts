@@ -2,7 +2,7 @@ import { IAddress } from "./address";
 
 export interface IOrderToCreate {
     basketId: string;
-    deliveryMethodId: number;
+    deliveryMethodId: string;
     shipToAddress: IAddress;
 }
 
@@ -25,4 +25,5 @@ export interface IOrder {
     subtotal: number;
     total: number;
     status: string;
+    statusId: string;
 }

@@ -1,5 +1,5 @@
 export interface IDeliveryMethod {
-    id: number;
+    id: string;
     shortName: string;
     deliveryTime: string;
     description: string;

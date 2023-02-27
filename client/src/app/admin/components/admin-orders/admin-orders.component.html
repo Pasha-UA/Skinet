@@ -20,11 +20,11 @@
                         <th>{{order.total | currency}}</th>
                         <th>
                             <select class="form-select mb-3"
-                                (change)="onOrderStatusChanged(order.id, $event.target.value[0])"
+                                (change)="onOrderStatusChanged(order.id, $event.target.value)"
                                 [(ngModel)]="order.status"
                             >
-                                <option *ngFor="let orderStatus of orderStatuses" [ngValue]="orderStatus.value">
-                                    {{orderStatus.name}} -- {{orderStatus.value}} -- {{orderStatus.id}}
+                                <option *ngFor="let orderStatus of orderStatusList" [ngValue]="orderStatus.value">
+                                    {{orderStatus.name}}
                                 </option>
                             </select>
                         </th>

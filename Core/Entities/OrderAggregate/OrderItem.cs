@@ -13,6 +13,7 @@ namespace Core.Entities.OrderAggregate
 
         public OrderItem(ProductItemOrdered itemOrdered, decimal price, int quantity)
         {
+            Id = string.Empty;
             ItemOrdered = itemOrdered;
             Price = price;
             Quantity = quantity;

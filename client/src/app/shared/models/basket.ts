@@ -14,7 +14,7 @@ export interface IBasketItem {
 export interface IBasket {
     id: string;
     items: IBasketItem[];
-    deliveryMethodId?: number;
+    deliveryMethodId?: string;
 }
 
 export class Basket implements IBasket {

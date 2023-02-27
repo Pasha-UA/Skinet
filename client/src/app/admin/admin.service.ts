@@ -21,8 +21,8 @@ export class AdminService {
     return this.http.get(this.baseUrl + 'admin/orders');
   }
 
-  updateOrderStatus(orderId: string, orderStatus: string) {
-    const paramMap = { 'orderStatusId': +orderStatus }
+  updateOrderStatus(orderId: string, orderStatusId: string) {
+    const paramMap = { 'orderStatusId': orderStatusId }
     return this.http.put(this.baseUrl + 'admin/order/' + orderId, {}, { params: paramMap });
   }
 
@@ -55,8 +55,8 @@ export class AdminService {
     return this.http.post(this.baseUrl + 'products/' + productId + '/photo/' + photoId, {});
   }
 
-  getOrderStatuses() {
-    return this.http.get(this.baseUrl + 'admin/orderstatuses');
+  getOrderStatusList() {
+    return this.http.get(this.baseUrl + 'admin/orderstatuslist');
   }
 
 }

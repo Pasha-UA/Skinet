@@ -26,11 +26,14 @@ namespace Infrastructure.Services
 
             //get items from the product repo
             var items = new List<OrderItem>();
+            var nextOrderItemId = await SetNextId<OrderItem>();
             foreach (var item in basket.Items)
             {
                 var productItem = await _unitOfWork.Repository<Product>().GetByIdAsync(item.Id);
                 var itemOrdered = new ProductItemOrdered(productItem.Id, productItem.Name, productItem.Photos.FirstOrDefault(x => x.IsMain)?.PictureUrl);
                 var orderItem = new OrderItem(itemOrdered, productItem.Price, item.quantity);
+                orderItem.Id = nextOrderItemId;
+                nextOrderItemId = (Convert.ToInt32(nextOrderItemId)+1).ToString(); // not safe...
                 items.Add(orderItem);
             }
 
@@ -39,8 +42,12 @@ namespace Infrastructure.Services
             // calc subtotal
             var subtotal = items.Sum(item => item.Price * item.Quantity);
 
+
             //create order
             var order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal);
+            // get order status from repo
+            order.Status = await _unitOfWork.Repository<OrderStatus>().GetByIdAsync(order.StatusId);
+            order.Id = await SetNextId<Order>();
             _unitOfWork.Repository<Order>().Add(order);
 
             //save to db
@@ -74,9 +81,21 @@ namespace Infrastructure.Services
             return await _unitOfWork.Repository<Order>().ListAsync(spec);
         }
 
-        public OrderStatuses GetOrderStatuses()
+        public async Task<IReadOnlyList<OrderStatus>> GetOrderStatusList()
         {
-            return new OrderStatuses();
+            return await _unitOfWork.Repository<OrderStatus>().ListAllAsync();
+//            return new OrderStatusList();
+        }
+
+        private async Task<string> SetNextId<T>() where T : BaseEntity
+        {
+            var entities = await _unitOfWork.Repository<T>().ListAllAsync();
+            int lastId = 0;
+            if (entities.Any())
+            {
+                lastId = entities.Max(o => Convert.ToInt32(o.Id));
+            }
+            return (lastId + 1).ToString();
         }
     }
 }

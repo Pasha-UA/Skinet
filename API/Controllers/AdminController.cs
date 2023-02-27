@@ -53,7 +53,8 @@ namespace API.Controllers
         [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<Order>> UpdateOrderStatus(string id, [FromQuery] string orderStatusId)
         {
-            var orderStatus = (OrderStatus)_orderService.GetOrderStatuses().Statuses.First(s => s.Id == int.Parse(orderStatusId)).Id;
+            var orderStatusList = await _orderService.GetOrderStatusList();
+            var orderStatus = orderStatusList.First(s => s.Id == orderStatusId);
             var order = await _adminService.UpdateOrderStatusAsync(id, orderStatus);
 
             if (order == null)
@@ -121,12 +122,12 @@ namespace API.Controllers
             return users;
         }
 
-        [HttpGet("orderstatuses")]
-        public ActionResult<IReadOnlyList<OrderStatus>> GetOrderStatuses()
+        [HttpGet("orderstatuslist")]
+        public async Task<ActionResult<IReadOnlyList<OrderStatus>>> GetOrderStatusList()
         {
-            var statuses = _orderService.GetOrderStatuses().Statuses;
+            var statusList = await _orderService.GetOrderStatusList();
 
-            return Ok(statuses);
+            return Ok(statusList);
         }
 
 

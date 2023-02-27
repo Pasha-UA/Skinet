@@ -12,7 +12,7 @@ namespace Core.Interfaces
         Task<Order> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus);
         Task<Order> GetOrderByIdAsync(string id);
         Task<IReadOnlyList<Order>> GetOrdersAsync();
-        // Task<IReadOnlyList<OrderStatus>> GetOrderStatuses(); // for Admin panel
+        // Task<IReadOnlyList<OrderStatus>> GetOrderStatusList(); // for Admin panel
 
     }
 }

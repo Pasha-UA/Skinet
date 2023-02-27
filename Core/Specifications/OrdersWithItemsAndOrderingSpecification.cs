@@ -15,7 +15,7 @@ namespace Core.Specifications
             // AddInclude(o => o.BuyerEmail);
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
-            //AddInclude(o => o.Status);
+            AddInclude(o => o.Status);
             AddOrderByDescending(o => o.OrderDate);
         }
 
@@ -23,7 +23,7 @@ namespace Core.Specifications
         {
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
-            //AddInclude(o => o.Status);
+            AddInclude(o => o.Status);
             AddOrderByDescending(o => o.OrderDate);
         }
         // public OrdersWithItemsAndOrderingSpecification(string id) : base(o => o.Id == id)
@@ -37,7 +37,7 @@ namespace Core.Specifications
         {
             AddInclude(o => o.OrderItems);
             AddInclude(o => o.DeliveryMethod);
-            //AddInclude(o => o.Status);
+            AddInclude(o => o.Status);
         }
     }
 }

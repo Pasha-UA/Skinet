@@ -41,8 +41,14 @@ namespace Infrastructure.Services
 
         public async Task<Order> UpdateOrderStatusAsync(string orderId, OrderStatus orderStatus)
         {
-            var spec = new OrdersWithItemsAndOrderingSpecification(orderId);
-            var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
+            // var spec = new OrdersWithItemsAndOrderingSpecification(orderId);
+            // var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
+
+            var spec = new OrdersWithItemsAndOrderingSpecification();
+
+            var orders = await _unitOfWork.Repository<Order>().ListAsync(spec);
+
+            var order = orders.FirstOrDefault(o=>o.Id==orderId);
 
             if (order == null) return null;
 
@@ -55,7 +61,7 @@ namespace Infrastructure.Services
 
         }
 
-        // public async Task<IReadOnlyList<OrderStatus>> GetOrderStatuses()
+        // public async Task<IReadOnlyList<OrderStatus>> GetOrderStatusList()
         // {
 
         //     // need logics

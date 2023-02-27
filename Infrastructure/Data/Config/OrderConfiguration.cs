@@ -18,11 +18,9 @@ namespace Infrastructure.Data.Config
                 a.WithOwner();
             });
 
-            builder.Property(s => s.Status)
-            .HasConversion(
-               o => o.ToString(),
-               o => (OrderStatus)Enum.Parse(typeof(OrderStatus), o)
-            );
+            builder.HasOne(s => s.Status).WithMany().HasForeignKey(o => o.StatusId).OnDelete(DeleteBehavior.Cascade);
+            // builder.HasOne(s => s.Status).WithMany(s=>s.Orders).HasForeignKey(o => o.StatusId).OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(o => o.OrderItems).WithOne().OnDelete(DeleteBehavior.Cascade);
         }
     }

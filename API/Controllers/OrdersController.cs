@@ -57,5 +57,12 @@ namespace API.Controllers
             return Ok(await _orderService.GetDeliveryMethodsAsync());
         }
 
+        [HttpPost("deliveryMethods")]
+        [Authorize(Roles = "Admin, Manager")]
+        public async Task<ActionResult<IReadOnlyList<DeliveryMethod>>> AddDeliveryMethod (DeliveryMethod deliveryMethod)
+        {
+            return Ok();
+        }
+
     }
 }

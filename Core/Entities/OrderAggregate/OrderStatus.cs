@@ -9,72 +9,92 @@ using System.Text.Json.Serialization;
 
 namespace Core.Entities.OrderAggregate
 {
-    public enum OrderStatus
+    public class OrderStatus : BaseEntity
     {
-        //[EnumMember(Value = "Pending")]
-        [EnumStringAttribute("Новый")]
-        Pending,
-        //[EnumMember(Value = "Payment Received")]
-        [EnumStringAttribute("Оплачен")]
-        PaymentReceived,
-        //[EnumMember(Value = "Payment Failed")]
-        [EnumStringAttribute("Не удалось оплатить")]
-        PaymentFailed,
-        //[EnumMember(Value = "Принят в обработку")]
-        [EnumStringAttribute("Принят в обработку")]
-        Accepted,
-        
-        [EnumStringAttribute("Выполнен")]
-        Complete,
-    }
-
-    public class OrderStatusDto
-    {
-        public int Id { get; set; }
+//        public string Id { get; set; }
         public string Value { get; set; }
         public string Name { get; set; }
-
+//        public ICollection<Order> Orders { get; set; }
     }
 
 
-    public class OrderStatuses
-    {
-        public List<OrderStatusDto> Statuses { get; set; }
-        public OrderStatuses()
-        {
-            this.Statuses = new List<OrderStatusDto>();
-            //this.Statuses = Enum.GetValues(typeof(OrderStatus))
-            //    .Cast<OrderStatus>()
-            //    .ToDictionary(t => (int)t, t => t.ToString());
+    // public enum OrderStatus
+    // {
+    //     //[EnumMember(Value = "Pending")]
+    //     [EnumStringAttribute("Новый")]
+    //     Pending,
+    //     //[EnumMember(Value = "Payment Received")]
+    //     [EnumStringAttribute("Оплачен")]
+    //     PaymentReceived,
+    //     //[EnumMember(Value = "Payment Failed")]
+    //     [EnumStringAttribute("Не удалось оплатить")]
+    //     PaymentFailed,
+    //     //[EnumMember(Value = "Принят в обработку")]
+    //     [EnumStringAttribute("Принят в обработку")]
+    //     Accepted,
 
-            foreach (var status in Enum.GetValues(typeof(OrderStatus)))
-            {
-                EnumStringAttribute[] attribute = (EnumStringAttribute[])status
-                    .GetType()
-                    .GetField(status.ToString())
-                    .GetCustomAttributes(typeof(EnumStringAttribute), false);
+    //     [EnumStringAttribute("Выполнен")]
+    //     Complete,
+    // }
 
-                Statuses.Add(new OrderStatusDto { Id = (int)status, Value = status.ToString(), Name = attribute[0].StringValue });
-            }
+    // public class OrderStatusDto
+    // {
+    //     public int Id { get; set; }
+    //     public string Value { get; set; }
+    //     public string Name { get; set; }
 
-        }
-
-    }
+    // }
 
 
-    public class EnumStringAttribute : Attribute
-    {
-        public EnumStringAttribute(string stringValue)
-        {
-            this.stringValue = stringValue;
-        }
-        private string stringValue;
-        public string StringValue
-        {
-            get { return stringValue; }
-            set { stringValue = value; }
-        }
-    }
+    // public class OrderStatusList
+    // {
+    //     public List<OrderStatus> Statuses { get; set; }
+    //     //        public List<OrderStatusDto> Statuses { get; set; }
+    //     public OrderStatusList()
+    //     {
+    //         this.Statuses = new List<OrderStatus>
+    //         {
+    //             new OrderStatus{ Id="1",  Value = "Pending", Name = "Новый" },
+    //             new OrderStatus{ Id="2",  Value = "Accepted", Name = "Принят" },
+    //             new OrderStatus{ Id="3",  Value = "PaymentReceived", Name = "Оплачен" },
+    //             new OrderStatus{ Id="4",  Value = "PaymentFailed", Name = "Не удалось оплатить" },
+    //             new OrderStatus{ Id="5",  Value = "PackageSent", Name = "Отправлено покупателю" },
+    //             new OrderStatus{ Id="6",  Value = "Complete", Name = "Выполнен" },
+    //             new OrderStatus{ Id="7",  Value = "Cancelled", Name = "Отменен" },
+    //         };
+    //         //            this.Statuses = new List<OrderStatusDto>();
+    //         //this.Statuses = Enum.GetValues(typeof(OrderStatus))
+    //         //    .Cast<OrderStatus>()
+    //         //    .ToDictionary(t => (int)t, t => t.ToString());
+
+    //         // foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+    //         // {
+    //         //     EnumStringAttribute[] attribute = (EnumStringAttribute[])status
+    //         //         .GetType()
+    //         //         .GetField(status.ToString())
+    //         //         .GetCustomAttributes(typeof(EnumStringAttribute), false);
+
+    //         //     Statuses.Add(new OrderStatusDto { Id = (int)status, Value = status.ToString(), Name = attribute[0].StringValue });
+    //         // }
+
+    //     }
+
+    // }
+
+
+    // public class EnumStringAttribute : Attribute
+    // {
+    //     public EnumStringAttribute(string stringValue)
+    //     {
+    //         this.stringValue = stringValue;
+    //     }
+    //     private string stringValue;
+    //     public string StringValue
+    //     {
+    //         get { return stringValue; }
+    //         set { stringValue = value; }
+    //     }
+    // }
 
 
 }
