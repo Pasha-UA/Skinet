@@ -19,7 +19,7 @@ namespace API.Dtos
         public string BarCode { get; set; }
         public string Stock { get; set; }
         public IEnumerable<PhotoToReturnDto> Photos { get; set; }
-        public IEnumerable<PriceItem> Prices { get; set; }
-        public PriceItem BulkPrice { get; set; }
+        // public IEnumerable<PriceItem> Prices { get; set; }
+        // public PriceItem BulkPrice { get; set; }
     }
 }

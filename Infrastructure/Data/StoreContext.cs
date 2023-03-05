@@ -1,6 +1,7 @@
 using System.Reflection;
 using Core.Entities;
 using Core.Entities.OrderAggregate;
+using Core.Entities.PriceListAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -20,6 +21,7 @@ namespace Infrastructure.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
+        // public DbSet<PriceItem> PriceItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

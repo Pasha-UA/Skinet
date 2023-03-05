@@ -36,8 +36,8 @@ namespace API.Dtos
         [Required]
         public string BarCode { get; set; }
 
-        public IEnumerable<PriceItem> Prices { get; set; }
+        // public List<PriceItem> Prices { get; set; }
        
-        public PriceItem BulkPrice { get; set; }
+        // public PriceItem BulkPrice { get; set; }
     }
 }

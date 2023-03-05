@@ -19,6 +19,7 @@ namespace Core.Specifications
         public string TypeId { get; set; }
         public string CategoryId { get; set; }
         public string Sort { get; set; }
+        public string BulkPrice { get; set; }
         private string _search;
         public string Search
         {

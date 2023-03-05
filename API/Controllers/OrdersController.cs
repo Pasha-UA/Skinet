@@ -61,7 +61,10 @@ namespace API.Controllers
         [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<IReadOnlyList<DeliveryMethod>>> AddDeliveryMethod (DeliveryMethod deliveryMethod)
         {
-            return Ok();
+
+            var result = await _orderService.AddDeliveryMethodAsync(deliveryMethod);
+            if (result==null) return BadRequest(new ApiResponse(400, "Не удалось добавить метод доставки"));
+            return Ok(result);
         }
 
     }

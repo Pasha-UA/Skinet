@@ -207,148 +207,13 @@ namespace API.Controllers
         //   [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
-            var result = new ImportFileResult();
-
-            var importParameters = new { }; // TODO: add logics for parameters, parameters should come together with import file
-
-            try
-            {
-                long size = importFile.Length;
-
-                // read file
-                var file = await _productRepository.SaveToDiskAsync(importFile);
-
-                if (file == null) return new ImportFileResultDto(false, null);
-
-                var priceList = new PriceListForImport();
-
-                if (await priceList.Import(file) == true)
-                {
-                    result.ProductsTotal = priceList.Offers.Count();
-
-                    var categoriesInDb = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
-
-                    foreach (var category in priceList.Categories)
-                    {
-
-                        ProductCategory categoryInDb = categoriesInDb.FirstOrDefault(c => c.Id == category.Id) ?? null;
-                        if (categoryInDb is null)
-                        {
-                            // create new category and save it to DB
-                            _unitOfWork.Repository<ProductCategory>().Add(category);
-
-                            var res = await _unitOfWork.Complete();
-
-                            if (res <= 0) result.CategoriesCreateErrorsCount++;
-                            else result.CategoriesCreated++;
-                        }
-                        else
-                        {
-                            if (category == categoryInDb)
-                            {
-                                // don't update, category not changed
-                                result.CategoriesNotUpdated++;
-                            }
-                            else
-                            {
-                                // category changed, update
-                                var res = await this.UpdateCategory(category);
-
-                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
-                                {
-                                    result.CategoriesUpdateSuccessCount++;
-                                }
-                                else result.CategoriesUpdateErrorsCount++;
-                            }
-                        }
-                    }
-
-                    // import changed products to db
-                    var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
-
-                    // find a list of products presenting in DB but not presenting in import file
-                    var notFoundProducts = new List<Product>(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
-                    result.ProductsNotFound = notFoundProducts.Count;
-
-                    foreach (var offer in priceList.Offers)
-                    {
-                        var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
-                        productCreate.ProductBrandId = "1";
-                        productCreate.ProductTypeId = "1";
-                        if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
-
-                        Product productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId) ?? null;
-
-                        if (productInDb is null) // no such product in db
-                        {
-                            // create new product and save it to DB
-                            var res = await this.CreateProduct(productCreate);
-                            if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
-                            {
-                                result.ProductsCreated++;
-                            }
-                            else result.ProductsCreateErrorsCount++;
-                        }
-                        else // product exists 
-                        {
-                            productCreate.Id = productInDb.Id;
-
-                            if (!EqualProductWithProductCreate(productInDb, productCreate))
-                            {
-                                //TODO: update comparision after price type is updated to 'Price' with array of prices
-                                var res = await this.UpdateProduct(productCreate.Id, productCreate);
-                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
-                                {
-                                    result.ProductsUpdateSuccessCount++;
-                                }
-                                else result.ProductsUpdateErrorsCount++;
-                            }
-                            else
-                            {
-                                // don't update, product not changed
-                                result.ProductsNotUpdated++;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Import file error: {0}", e);
-                return new ImportFileResultDto(false, null);
-            }
-            return new ImportFileResultDto(true, result);
+            // TODO: add logics for parameters, parameters should come together with import file
+            var importParameters = new ImportFileParameters(); 
+            var result = await this.ImportPriceListFromFile(importFile, importParameters);
+            if (result ==null) return BadRequest(new ApiResponse(400, "Error on file import"));
+            return new ImportFileResultDto(success: true, result: result);
         }
 
-        private bool EqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto)
-        {// TODO: Update comparer using all necessary fields
-            var pricesNotChanged = true;
-            if (product.Prices != null && productCreateDto.Prices != null)
-            {
-                pricesNotChanged = product.Prices.SequenceEqual(productCreateDto.Prices); // TODO: Add comparer for prices! And then uncomment last line in return block
-            }
-            else if (product.Prices == null && productCreateDto.Prices == null)
-            {
-                // Both sequences are null, so the prices have not changed
-                pricesNotChanged = true;
-            }
-            else
-            {
-                // One sequence is null, so the prices have changed
-                pricesNotChanged = false;
-            }
-
-            return (String.Compare(product.Name, productCreateDto.Name) == 0)
-                    && (String.Compare(product.Description, productCreateDto.Description) == 0)
-                    && product.Price == productCreateDto.Price
-                    && (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0)
-                    && (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0)
-                    && (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0)
-                    && product.Stock == productCreateDto.Stock 
-                    && (String.Compare(product.BarCode, productCreateDto.BarCode) == 0) 
-                    // && pricesNotChanged  // TODO: uncomment when price comparer is complete
-            ;
-        }
 
         [HttpDelete("{id}/photo/{photoId}")]
         [Authorize(Roles = "Admin")]
@@ -402,5 +267,155 @@ namespace API.Controllers
 
             return _mapper.Map<Product, ProductToReturnDto>(product);
         }
+
+        private bool EqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto, ImportFileParameters parameters)
+        {
+            // TODO: Update comparer using all necessary fields
+            // var pricesNotChanged = true;
+            // if (product.Prices != null && productCreateDto.Prices != null)
+            // {
+            //     var comparer = new PriceItemsComparer();
+            //     pricesNotChanged = product.Prices.SequenceEqual(productCreateDto.Prices, comparer);
+            // }
+            // else if (product.Prices == null && productCreateDto.Prices == null)
+            // {
+            //     // Both sequences are null, so the prices have not changed
+            //     pricesNotChanged = true;
+            // }
+            // else
+            // {
+            //     // One sequence is null, so the prices have changed
+            //     pricesNotChanged = false;
+            // }
+
+            return (String.Compare(product.Name, productCreateDto.Name) == 0)
+                    && (String.Compare(product.Description, productCreateDto.Description) == 0)
+                    && product.Price == productCreateDto.Price
+                    // && product.BulkPrice == productCreateDto.BulkPrice
+                    && (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0)
+                    && (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0)
+                    && (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0)
+                    && product.Stock == productCreateDto.Stock
+                    && (String.Compare(product.BarCode, productCreateDto.BarCode) == 0)
+                    // && pricesNotChanged
+            ;
+        }
+
+        private async Task<ImportFileResult> ImportPriceListFromFile(IFormFile importFile, ImportFileParameters parameters)
+        {
+            var result = new ImportFileResult();
+
+            try
+            {
+                long size = importFile.Length;
+
+                // read file
+                var file = await _productRepository.SaveToDiskAsync(importFile);
+
+                if (file == null) return null;
+
+                var priceList = new PriceListForImport();
+
+                if (await priceList.Import(file) == true)
+                {
+                    result.ProductsTotal = priceList.Offers.Count();
+
+                    var categoriesInDb = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
+
+                    foreach (var category in priceList.Categories)
+                    {
+
+                        ProductCategory categoryInDb = categoriesInDb.FirstOrDefault(c => c.Id == category.Id) ?? null;
+                        if (categoryInDb is null)
+                        {
+                            // create new category and save it to DB
+                            _unitOfWork.Repository<ProductCategory>().Add(category);
+
+                            var res = await _unitOfWork.Complete();
+
+                            if (res <= 0) result.CategoriesCreateErrors++;
+                            else result.CategoriesCreated++;
+                        }
+                        else
+                        {
+                            if (category == categoryInDb)
+                            {
+                                // don't update, category not changed
+                                result.CategoriesNotUpdated++;
+                            }
+                            else
+                            {
+                                // category changed, update
+                                var res = await this.UpdateCategory(category);
+
+                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                {
+                                    result.CategoriesUpdateSuccess++;
+                                }
+                                else result.CategoriesUpdateErrors++;
+                            }
+                        }
+                    }
+
+                    // import changed products to db
+                    var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
+
+                    // // find a list of products presenting in DB but not presenting in import file
+                    var notFoundProducts = new List<Product>(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
+                    result.ProductsNotFound = notFoundProducts.Count;
+
+                    foreach (var offer in priceList.Offers)
+                    {
+                        var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
+                        // if (!(productCreate.Prices.Any())) productCreate.Prices = null;
+                        if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
+
+                        Product productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId) ?? null;
+
+                        if (productInDb is null) // no such product in db
+                        {
+                            // create new product and save it to DB
+                            var res = await this.CreateProduct(productCreate);
+                            if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                            {
+                                result.ProductsCreated++;
+                            }
+                            else result.ProductsCreateErrors++;
+                        }
+                        else // product exists 
+                        {
+                            productCreate.Id = productInDb.Id;
+
+                            if (!EqualProductWithProductCreate(productInDb, productCreate, parameters))
+                            {
+                                var res = await this.UpdateProduct(productCreate.Id, productCreate);
+                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                {
+                                    result.ProductsUpdateSuccess++;
+                                }
+                                else result.ProductsUpdateErrors++;
+                            }
+                            else
+                            {
+                                // don't update, product not changed
+                                result.ProductsNotUpdated++;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Import file error: {0}", e);
+                return null;
+            }
+            return result;
+
+        }
+
     }
 }

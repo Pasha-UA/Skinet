@@ -33,7 +33,7 @@ namespace Infrastructure.Services
                 var itemOrdered = new ProductItemOrdered(productItem.Id, productItem.Name, productItem.Photos.FirstOrDefault(x => x.IsMain)?.PictureUrl);
                 var orderItem = new OrderItem(itemOrdered, productItem.Price, item.quantity);
                 orderItem.Id = nextOrderItemId;
-                nextOrderItemId = (Convert.ToInt32(nextOrderItemId)+1).ToString(); // not safe...
+                nextOrderItemId = (Convert.ToInt32(nextOrderItemId) + 1).ToString(); // not safe...
                 items.Add(orderItem);
             }
 
@@ -67,6 +67,15 @@ namespace Infrastructure.Services
             return await _unitOfWork.Repository<DeliveryMethod>().ListAllAsync();
         }
 
+        public async Task<DeliveryMethod> AddDeliveryMethodAsync(DeliveryMethod deliveryMethod)
+        {
+            deliveryMethod.Id = await SetNextId<DeliveryMethod>();
+            _unitOfWork.Repository<DeliveryMethod>().Add(deliveryMethod);
+            var result = await _unitOfWork.Complete();
+            if (result <= 0) return null;
+            return deliveryMethod;
+        }
+
         public async Task<Order> GetOrderByIdAsync(string id, string buyerEmail)
         {
             var spec = new OrdersWithItemsAndOrderingSpecification(id, buyerEmail);
@@ -84,7 +93,7 @@ namespace Infrastructure.Services
         public async Task<IReadOnlyList<OrderStatus>> GetOrderStatusList()
         {
             return await _unitOfWork.Repository<OrderStatus>().ListAllAsync();
-//            return new OrderStatusList();
+            //            return new OrderStatusList();
         }
 
         private async Task<string> SetNextId<T>() where T : BaseEntity

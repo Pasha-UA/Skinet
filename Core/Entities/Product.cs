@@ -4,12 +4,14 @@ namespace Core.Entities
 {
     public class Product : BaseEntity
     {
-        public string ExternalId {get; set;} // id in external db. used for import
+        public string ExternalId { get; set; } // id in external db. used for import
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; } // TODO: change type to 'Price'
-        public List<PriceItem> Prices { get; set; } // TODO: uncomment and add logics
-//        public PriceItem BulkPrice { get; set; } // TODO: uncomment and add logics
+        public string PriceItemId { get; set; }
+        // private readonly List<PriceItem> _prices = new List<PriceItem>();
+        // public List<PriceItem> Prices {get; set;}
+        // public PriceItem BulkPrice { get; set; }
         public ProductType ProductType { get; set; }
         public string ProductTypeId { get; set; }
         public ProductBrand ProductBrand { get; set; }

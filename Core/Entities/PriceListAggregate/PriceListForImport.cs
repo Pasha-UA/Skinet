@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,16 +12,16 @@ namespace Core.Entities
 {
     public class PriceListForImport
     {
-        private XmlDocument xmlDocument;
-        private string inputFileNameInStock;
-        private XmlNode rootNode;
-        private MapperConfiguration MapperConfig = new MapperConfiguration(cfg => cfg.CreateMap<PriceType, PriceItem>());
-        private Mapper Mapper;
+        private XmlDocument _xmlDocument;
+        private string _inputFileNameInStock;
+        private XmlNode _rootNode;
+        private MapperConfiguration _mapperConfig = new MapperConfiguration(cfg => cfg.CreateMap<PriceType, PriceItem>());
+        private Mapper _mapper;
 
 
         public PriceListForImport()
         {
-            Mapper = new Mapper(MapperConfig);
+            _mapper = new Mapper(_mapperConfig);
         }
 
         public int Progress()
@@ -53,7 +54,7 @@ namespace Core.Entities
         {
             var categories = new List<ProductCategory>();
             Console.WriteLine("Filling categories list ...");
-            var categoriesXml = rootNode.SelectSingleNode("Классификатор/Группы").ChildNodes;
+            var categoriesXml = _rootNode.SelectSingleNode("Классификатор/Группы").ChildNodes;
             foreach (XmlNode node in categoriesXml)
             {
                 ProductCategory item = new ProductCategory()
@@ -72,13 +73,13 @@ namespace Core.Entities
         private PriceType[] FillPriceTypes()
         {
             Console.WriteLine("Filling price types ...");
-            var priceTypesXml = rootNode.SelectSingleNode("ПакетПредложений/ТипыЦен").ChildNodes;
+            var priceTypesXml = _rootNode.SelectSingleNode("ПакетПредложений/ТипыЦен").ChildNodes;
             var priceTypes = new List<PriceType>();
             foreach (XmlNode node in priceTypesXml)
             {
                 PriceType item = new PriceType();
                 if (String.Compare(node.SelectNodes("ИДЦенаСайт").Item(0).InnerText, "Розничная") == 0)
-                {
+                { // retail price
                     item = new PriceType()
                     {
                         Id = node.SelectNodes("Ид").Item(0).InnerText,
@@ -86,14 +87,27 @@ namespace Core.Entities
                         IsRetail = true,
                     };
                 }
-                else
+                else if ((String.Compare(node.SelectNodes("ИДЦенаСайт").Item(0).InnerText, "Оптовая") == 0)
+                        && (String.Compare(node.SelectNodes("Наименование").Item(0).InnerText, "Опт, $") == 0))
                 {
+                    if (String.Compare(node.SelectNodes("Валюта").Item(0).InnerText, "USD") == 0)
+                    {// wholesale (bulk) price
+                        item = new PriceType()
+                        {
+                            Id = node.SelectNodes("Ид").Item(0).InnerText,
+                            CurrencyId = node.SelectNodes("Валюта").Item(0).InnerText,
+                            IsBulk = true,
+                        };
+                    }
+                    else continue;
+                }
+                else
+                { // retail price with discount depending of quantity
                     item = new PriceType()
                     {
                         Id = node.SelectNodes("Ид").Item(0).InnerText,
                         Quantity = Int32.Parse(Regex.Match(node.SelectNodes("Наименование").Item(0).InnerText, @"\d+").Value),
                         CurrencyId = node.SelectNodes("Валюта").Item(0).InnerText,
-                        IsRetail = false,
                     };
                 }
                 priceTypes.Add(item);
@@ -108,7 +122,7 @@ namespace Core.Entities
             var offers = new List<OfferItem>();
 
             Console.WriteLine("Filling product list ...");
-            var offersXml = rootNode.SelectSingleNode("ПакетПредложений/Предложения").ChildNodes;
+            var offersXml = _rootNode.SelectSingleNode("ПакетПредложений/Предложения").ChildNodes;
             foreach (XmlNode node in offersXml)
             {
                 var prices = new List<PriceItem>();
@@ -116,8 +130,11 @@ namespace Core.Entities
                 foreach (XmlNode price in pricesNodeXml)
                 {
                     var Id = price.SelectNodes("ИдТипаЦены").Item(0).InnerText;
-                    PriceItem priceItem = Mapper.Map<PriceItem>(PriceTypes.First(p => p.Id == Id));
-                    priceItem.Price = Decimal.Parse(price.SelectNodes(" ЦенаЗаЕдиницу").Item(0).InnerText);
+                    PriceItem priceItem = _mapper.Map<PriceItem>(PriceTypes.First(p => p.Id == Id));
+
+                    var p = price.SelectNodes(" ЦенаЗаЕдиницу").Item(0).InnerText
+                        .Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+                    priceItem.Price = Decimal.Parse(p);
 
                     prices.Add(priceItem);
                 }
@@ -125,11 +142,12 @@ namespace Core.Entities
                 OfferItem item = new OfferItem()
                 {
                     Id = node.SelectNodes("Ид").Item(0).InnerText,
-                    RetailPrice = prices.FirstOrDefault(p => p.IsRetail, null).Price,
-                    RetailPriceCurrencyId = prices.FirstOrDefault(p => p.IsRetail, null).CurrencyId,
-                    PriceItems = prices.Where(p => !p.IsRetail).Any() ? prices.Where(p => !p.IsRetail).ToArray() : null,
-                    SellingType = prices.Where(p => !p.IsRetail).Any() ? "u" : "r"
-
+                    RetailPrice = prices.FirstOrDefault(p => p.IsRetail)?.Price,
+                    RetailPriceCurrencyId = prices.FirstOrDefault(p => p.IsRetail)?.CurrencyId,
+                    BulkPrice = prices.FirstOrDefault(p => p.IsBulk),
+                    // PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).DefaultIfEmpty().ToArray(),
+                    PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).Any() ? prices.Where(p => !p.IsRetail && !p.IsBulk).ToArray() : null,
+                    // SellingType = prices.Where(p => !p.IsRetail).Any() ? "u" : "r"
                 };
                 offers.Add(item);
             }
@@ -138,7 +156,7 @@ namespace Core.Entities
 
             // fill goods list --start
             Console.WriteLine("Filling product characteristics ...");
-            var goodsXml = rootNode.SelectSingleNode("ПакетПредложений/Товары").ChildNodes;
+            var goodsXml = _rootNode.SelectSingleNode("ПакетПредложений/Товары").ChildNodes;
             var updatedOffers = new List<OfferItem>();
 
 
@@ -200,10 +218,10 @@ namespace Core.Entities
         {
             try
             {
-                inputFileNameInStock = file.FileName;
-                xmlDocument = new XmlDocument();
-                xmlDocument.LoadXml(await File.ReadAllTextAsync(inputFileNameInStock));
-                rootNode = xmlDocument.FirstChild.NextSibling;
+                _inputFileNameInStock = file.FileName;
+                _xmlDocument = new XmlDocument();
+                _xmlDocument.LoadXml(await File.ReadAllTextAsync(_inputFileNameInStock));
+                _rootNode = _xmlDocument.FirstChild.NextSibling;
 
                 this.Currencies = FillCurrencies();
                 this.Categories = FillCategories();

@@ -33,7 +33,7 @@ namespace Core.Entities.PriceListAggregate
 
             public ParameterItem[] Parameters { get; set; }
 
-            public string SellingType { get; set; }
+            // public string SellingType { get; set; }
 
             //... add necessary fields
 
@@ -43,21 +43,6 @@ namespace Core.Entities.PriceListAggregate
     {
         public string Name { get; set; }
         public string Value { get; set; }
-    }
-
-    public class PriceType : BaseEntity
-    {
-        public int? Quantity { get; set; }
-
-        public string CurrencyId { get; set; }
-
-        public bool IsRetail { get; set; }
-    }
-
-    public class PriceItem : PriceType
-    {
- 
-        public decimal Price { get; set; }
     }
 
 
