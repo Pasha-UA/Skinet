@@ -8,9 +8,10 @@ namespace Core.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; } // TODO: change type to 'Price'
-        public string PriceItemId { get; set; }
+        // public string PriceItemId { get; set; }
         // private readonly List<PriceItem> _prices = new List<PriceItem>();
-        // public List<PriceItem> Prices {get; set;}
+        public virtual List<PriceItem> Prices {get; set;} // list of prices
+
         // public PriceItem BulkPrice { get; set; }
         public ProductType ProductType { get; set; }
         public string ProductTypeId { get; set; }

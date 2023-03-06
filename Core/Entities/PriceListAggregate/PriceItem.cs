@@ -7,6 +7,8 @@ namespace Core.Entities.PriceListAggregate
 {
     public class PriceItem : PriceType
     {
+
+        // public PriceType PriceType {get; set;}
         public decimal Price { get; set; }
         // public string ProductId { get; set; }
 
@@ -17,7 +19,7 @@ namespace Core.Entities.PriceListAggregate
 
             return (
                 a.Quantity == b.Quantity
-                && a.Price == b.Price
+                && Decimal.Compare(a.Price, b.Price) == 0
                 && string.Compare(a.CurrencyId, b.CurrencyId) == 0
                 && string.Compare(a.Id, b.Id) == 0
                 );
@@ -48,7 +50,7 @@ namespace Core.Entities.PriceListAggregate
             return (
                 string.Compare(this.Id, other.Id) == 0
                 && string.Compare(this.CurrencyId, other.CurrencyId) == 0
-                && this.Price == other.Price
+                && Decimal.Compare(this.Price, other.Price) ==  0
                 && this.Quantity == other.Quantity
             );
         }

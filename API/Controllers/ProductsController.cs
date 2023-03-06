@@ -271,22 +271,22 @@ namespace API.Controllers
         private bool EqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto, ImportFileParameters parameters)
         {
             // TODO: Update comparer using all necessary fields
-            // var pricesNotChanged = true;
-            // if (product.Prices != null && productCreateDto.Prices != null)
-            // {
-            //     var comparer = new PriceItemsComparer();
-            //     pricesNotChanged = product.Prices.SequenceEqual(productCreateDto.Prices, comparer);
-            // }
-            // else if (product.Prices == null && productCreateDto.Prices == null)
-            // {
-            //     // Both sequences are null, so the prices have not changed
-            //     pricesNotChanged = true;
-            // }
-            // else
-            // {
-            //     // One sequence is null, so the prices have changed
-            //     pricesNotChanged = false;
-            // }
+            var pricesNotChanged = true;
+            if (product.Prices != null && productCreateDto.Prices != null)
+            {
+                var comparer = new PriceItemsComparer();
+                pricesNotChanged = product.Prices.SequenceEqual(productCreateDto.Prices, comparer);
+            }
+            else if (product.Prices == null && productCreateDto.Prices == null)
+            {
+                // Both sequences are null, so the prices have not changed
+                pricesNotChanged = true;
+            }
+            else
+            {
+                // One sequence is null, so the prices have changed
+                pricesNotChanged = false;
+            }
 
             return (String.Compare(product.Name, productCreateDto.Name) == 0)
                     && (String.Compare(product.Description, productCreateDto.Description) == 0)
@@ -297,7 +297,7 @@ namespace API.Controllers
                     && (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0)
                     && product.Stock == productCreateDto.Stock
                     && (String.Compare(product.BarCode, productCreateDto.BarCode) == 0)
-                    // && pricesNotChanged
+                    && pricesNotChanged
             ;
         }
 
@@ -368,7 +368,7 @@ namespace API.Controllers
                     {
                         var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
                         // if (!(productCreate.Prices.Any())) productCreate.Prices = null;
-                        if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
+                        // if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
 
                         Product productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId) ?? null;
 

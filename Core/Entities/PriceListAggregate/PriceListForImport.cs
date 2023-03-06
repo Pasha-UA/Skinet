@@ -146,7 +146,7 @@ namespace Core.Entities
                     RetailPriceCurrencyId = prices.FirstOrDefault(p => p.IsRetail)?.CurrencyId,
                     BulkPrice = prices.FirstOrDefault(p => p.IsBulk),
                     // PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).DefaultIfEmpty().ToArray(),
-                    PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).Any() ? prices.Where(p => !p.IsRetail && !p.IsBulk).ToArray() : null,
+                    PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).Any() ? prices.Where(p => !p.IsRetail && !p.IsBulk).ToList() : null,
                     // SellingType = prices.Where(p => !p.IsRetail).Any() ? "u" : "r"
                 };
                 offers.Add(item);

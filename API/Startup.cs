@@ -26,9 +26,9 @@ namespace API
             services.AddControllers();
             services.AddDbContext<StoreContext>(x =>
             {
-                x.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+               x.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+                // x.UseSqlServer(_config.GetConnectionString("MSSqlDbConnection"));
                 x.EnableSensitiveDataLogging();
-//                x.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
             // services.AddDbContext<AppIdentityDbContext>(x =>
