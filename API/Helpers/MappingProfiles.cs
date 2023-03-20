@@ -21,6 +21,7 @@ namespace API.Helpers
                 .ForMember(d => d.ProductType, o => o.MapFrom(s => s.ProductType.Name))
                 .ForMember(d => d.ProductCategory, o => o.MapFrom(s => s.ProductCategory.Name))
                 .ForMember(d => d.PictureUrl, o => o.MapFrom<ProductUrlResolver>())
+                // .ForMember(d=>d.Prices, o=>o.MapFrom(s=>s.Prices))
                 ;
 
             CreateMap<Core.Entities.Identity.Address, AddressDto>().ReverseMap();
@@ -43,7 +44,7 @@ namespace API.Helpers
                 .ForMember(d => d.PictureUrl, o => o.MapFrom<OrderItemUrlResolver>());
 
             CreateMap<ProductCreateDto, Product>()
-                .ForMember(d => d.Prices, p => p.MapFrom(s => s.Prices))
+                // .ForMember(d => d.ProductsPriceItems, p => p.MapFrom(s => s.Prices))
                 ;
 
             CreateMap<OfferItem, Product>()
@@ -58,7 +59,7 @@ namespace API.Helpers
                 .ForMember(d => d.Stock, o => o.MapFrom(s => s.QuantityInStock))
                 .ForMember(d => d.ProductCategoryId, o => o.MapFrom(s => s.CategoryId))
                 .ForMember(d => d.ExternalId, o => o.MapFrom(s => s.Id))
-                .ForMember(d => d.Prices, o => o.MapFrom(s => s.PriceItems))
+                .ForMember(d => d.Prices, o => o.MapFrom(s => s.Prices))
                 .ForMember(d => d.Description, o => o.NullSubstitute(string.Empty))
                 .AfterMap((s, d) => d.ProductBrandId = "1") // TODO: update logics after type and brand logics is updated
                 .AfterMap((s, d) => d.ProductTypeId = "1") // TODO:  --//--

@@ -10,7 +10,8 @@ namespace Core.Entities
         public decimal Price { get; set; } // TODO: change type to 'Price'
         // public string PriceItemId { get; set; }
         // private readonly List<PriceItem> _prices = new List<PriceItem>();
-        public virtual List<PriceItem> Prices {get; set;} // list of prices
+        // public virtual IList<ProductPrice> ProductsPrices {get; set;}
+        public IList<Price> Prices {get; set;}
 
         // public PriceItem BulkPrice { get; set; }
         public ProductType ProductType { get; set; }
@@ -23,6 +24,7 @@ namespace Core.Entities
         public IReadOnlyList<Photo> Photos => _photos.AsReadOnly();
         public int Stock { get; set; } = 0;
         public string BarCode { get; set; }
+        // public bool Visible { get; set; }
 
         public void AddPhoto(string pictureUrl, string fileName, bool isMain = false)
         {
@@ -62,7 +64,6 @@ namespace Core.Entities
         // new fields
         //        public string ShortDescription { get; set; }
         //        public string BasicUnit { get; set; }
-        //        public bool Visible {get; set;} = true;
         //        public List<Price> WholesalePrices { get; set; }
         //        public List<AdditionalField> AdditionalFields {get;set;}
 

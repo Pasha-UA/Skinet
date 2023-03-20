@@ -13,5 +13,5 @@ namespace Core.Entities
         public string Symbol { get; set; }
         public decimal Rate { get; set; }
         public bool IsPrimary { get; set; }
-    }
+    }    
 }

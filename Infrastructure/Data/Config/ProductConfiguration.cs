@@ -17,7 +17,7 @@ namespace Infrastructure.Data.Config
             builder.HasOne(b=>b.ProductBrand).WithMany().HasForeignKey(p=>p.ProductBrandId);
             builder.HasOne(t=>t.ProductType).WithMany().HasForeignKey(p=>p.ProductTypeId);
             builder.HasOne(c=>c.ProductCategory).WithMany().HasForeignKey(p=>p.ProductCategoryId);
-            // builder.HasMany(p=>p.Prices).WithOne().HasForeignKey(p=>p.Id).OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(p=>p.Prices).WithOne().HasForeignKey(p=>p.ProductId).OnDelete(DeleteBehavior.Cascade);
             // builder.OwnsOne(p => p.Prices, pt=>{pt.WithOwner();});
 
         }

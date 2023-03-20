@@ -21,7 +21,10 @@ namespace Infrastructure.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
-        public DbSet<PriceItem> PriceItems { get; set; }
+        public DbSet<PriceType> PriceTypes { get; set; }
+        public DbSet<Price> Prices { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
+        // public DbSet<ProductPrice> ProductPrices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

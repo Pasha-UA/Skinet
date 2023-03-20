@@ -15,7 +15,7 @@ namespace Core.Entities
         private XmlDocument _xmlDocument;
         private string _inputFileNameInStock;
         private XmlNode _rootNode;
-        private MapperConfiguration _mapperConfig = new MapperConfiguration(cfg => cfg.CreateMap<PriceType, PriceItem>());
+        private MapperConfiguration _mapperConfig = new MapperConfiguration(cfg => cfg.CreateMap<PriceType, Price>());
         private Mapper _mapper;
 
 
@@ -44,9 +44,9 @@ namespace Core.Entities
         {
             return new Currency[]
                 {
-                        new Currency { CurrencyId = "UAH", Rate = 1, CurrencyCode = "980", Symbol="₴" },
-                        new Currency { CurrencyId = "USD", Rate = 42, CurrencyCode = "840", Symbol = "$"},
-                        new Currency { CurrencyId = "EUR", Rate = 45, CurrencyCode = "978", Symbol = "€" }
+                        new Currency { Id = "UAH", CurrencyId = "UAH", Rate = 1, CurrencyCode = "980", Symbol="₴" },
+                        new Currency { Id = "USD", CurrencyId = "USD", Rate = 42, CurrencyCode = "840", Symbol = "$"},
+                        new Currency { Id = "EUR", CurrencyId = "EUR", Rate = 45, CurrencyCode = "978", Symbol = "€" }
                 };
         }
 
@@ -123,34 +123,50 @@ namespace Core.Entities
 
             Console.WriteLine("Filling product list ...");
             var offersXml = _rootNode.SelectSingleNode("ПакетПредложений/Предложения").ChildNodes;
+            var _prices = new List<Price>();
             foreach (XmlNode node in offersXml)
             {
-                var prices = new List<PriceItem>();
+                var prices = new List<Price>();
+                var productExternalId = node.SelectNodes("Ид").Item(0).InnerText;
                 XmlNode pricesNodeXml = node.SelectSingleNode("Цены");
                 foreach (XmlNode price in pricesNodeXml)
                 {
-                    var Id = price.SelectNodes("ИдТипаЦены").Item(0).InnerText;
-                    PriceItem priceItem = _mapper.Map<PriceItem>(PriceTypes.First(p => p.Id == Id));
-
+                    var priceTypeId = price.SelectNodes("ИдТипаЦены").Item(0).InnerText;
                     var p = price.SelectNodes(" ЦенаЗаЕдиницу").Item(0).InnerText
                         .Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
-                    priceItem.Price = Decimal.Parse(p);
-
+                    var priceItem = new Price
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        PriceTypeId = priceTypeId,
+                        ProductId = productExternalId,
+                        Value = Decimal.Parse(p)
+                    };
                     prices.Add(priceItem);
+                    // _prices.Add(priceItem); //
                 }
 
+                var pricesWithTypes = prices.Join(this.PriceTypes, p => p.PriceTypeId, pt => pt.Id, (price, priceType) => new { price, priceType });
                 OfferItem item = new OfferItem()
                 {
-                    Id = node.SelectNodes("Ид").Item(0).InnerText,
-                    RetailPrice = prices.FirstOrDefault(p => p.IsRetail)?.Price,
-                    RetailPriceCurrencyId = prices.FirstOrDefault(p => p.IsRetail)?.CurrencyId,
-                    BulkPrice = prices.FirstOrDefault(p => p.IsBulk),
+                    // Id = productId,
+                    // RetailPrice = prices.FirstOrDefault(p => p.PriceType.IsRetail)?.Value,
+                    // RetailPriceCurrencyId = prices.FirstOrDefault(p => p.PriceType.IsRetail)?.PriceType.CurrencyId,
+                    // BulkPrice = prices.FirstOrDefault(p => p.PriceType.IsBulk),
+                    // // PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).DefaultIfEmpty().ToArray(),
+                    // Prices = prices.Where(p => !p.PriceType.IsRetail && !p.PriceType.IsBulk).Any() ? prices.Where(p => !p.PriceType.IsRetail && !p.PriceType.IsBulk).ToList() : null,
+                    Id = productExternalId,
+                    RetailPrice = pricesWithTypes.FirstOrDefault(p => p.priceType.IsRetail)?.price.Value,
+                    RetailPriceCurrencyId = pricesWithTypes.FirstOrDefault(p => p.priceType.IsRetail)?.priceType.CurrencyId,
+                    BulkPrice = pricesWithTypes.FirstOrDefault(p => p.priceType.IsBulk)?.price,
                     // PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).DefaultIfEmpty().ToArray(),
-                    PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).Any() ? prices.Where(p => !p.IsRetail && !p.IsBulk).ToList() : null,
-                    // SellingType = prices.Where(p => !p.IsRetail).Any() ? "u" : "r"
+                    // Prices = pricesWithTypes.Where(p => !p.priceType.IsRetail && !p.priceType.IsBulk).Any() ? 
+                    // pricesWithTypes.Where(p => !p.priceType.IsRetail && !p.priceType.IsBulk).Select(p=>p.price).ToList() : null,
+                    Prices = pricesWithTypes.Any() ?
+                                    pricesWithTypes.Select(p => p.price).ToList() : null,
                 };
                 offers.Add(item);
             }
+            // this.Prices = _prices.ToArray();
             Console.WriteLine("Filling product list complete. Total {0}", offers.Count);
             // fill offers list --end
 
@@ -228,7 +244,7 @@ namespace Core.Entities
                 this.PriceTypes = FillPriceTypes();
                 this.Offers = FillOfferItems();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }

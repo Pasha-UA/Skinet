@@ -15,6 +15,7 @@ using System.Xml;
 using Core.Entities.Comparers;
 using Core.Entities.PriceListAggregate;
 using System.Security.Cryptography;
+using System.Reflection;
 
 namespace API.Controllers
 {
@@ -81,15 +82,6 @@ namespace API.Controllers
             return Ok(await _unitOfWork.Repository<ProductCategory>().ListAllAsync());
         }
 
-        // [Cached(1000)]
-        // [HttpGet("categoriesTree")]
-        // public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategoriesTree()
-        // {
-        //     var categories = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
-
-        //     // TODO: make return as tree ?
-        //     return Ok(categories);
-        // }
 
         [Cached(1000)]
         [HttpGet("types")]
@@ -131,23 +123,20 @@ namespace API.Controllers
 
             return Ok(product);
         }
+        // public async Task<ActionResult<Product>> UpdateProduct(Product productToUpdate)
+        // {
+        //     var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productToUpdate.Id);
 
-        private async Task<ActionResult<ProductCategory>> UpdateCategory(ProductCategory categoryToUpdate)
-        {
-            var category = await _unitOfWork.Repository<ProductCategory>().GetByIdAsync(categoryToUpdate.Id);
-            category.Name = categoryToUpdate.Name;
-            category.ParentId = categoryToUpdate.ParentId;
-            //            _mapper.Map(categoryToUpdate, category);
+        //     // _mapper.Map(productToUpdate, product);
 
-            _unitOfWork.Repository<ProductCategory>().Update(category);
+        //     _unitOfWork.Repository<Product>().Update(product);
 
-            var result = await _unitOfWork.Complete();
+        //     var result = await _unitOfWork.Complete();
 
-            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating category"));
+        //     if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating product"));
 
-            return Ok(category);
-        }
-
+        //     return Ok(product);
+        // }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
@@ -208,9 +197,10 @@ namespace API.Controllers
         public async Task<ActionResult<ImportFileResultDto>> ImportProducts([FromForm] IFormFile importFile)
         {
             // TODO: add logics for parameters, parameters should come together with import file
-            var importParameters = new ImportFileParameters(); 
+            var importParameters = new ImportFileParameters();
+
             var result = await this.ImportPriceListFromFile(importFile, importParameters);
-            if (result ==null) return BadRequest(new ApiResponse(400, "Error on file import"));
+            if (result == null) return BadRequest(new ApiResponse(400, "Error on file import"));
             return new ImportFileResultDto(success: true, result: result);
         }
 
@@ -270,12 +260,12 @@ namespace API.Controllers
 
         private bool EqualProductWithProductCreate(Product product, ProductCreateDto productCreateDto, ImportFileParameters parameters)
         {
-            // TODO: Update comparer using all necessary fields
             var pricesNotChanged = true;
             if (product.Prices != null && productCreateDto.Prices != null)
             {
-                var comparer = new PriceItemsComparer();
-                pricesNotChanged = product.Prices.SequenceEqual(productCreateDto.Prices, comparer);
+                var comparerPrice = new CompareEntities<Price>();
+                pricesNotChanged = product.Prices.OrderBy(p => p.PriceTypeId).SequenceEqual(productCreateDto.Prices.OrderBy(p => p.PriceTypeId), comparerPrice);
+                // pricesNotChanged = product.Prices.OrderBy(p => p.PriceTypeId).SequenceEqual(productCreateDto.Prices.OrderBy(p => p.PriceTypeId));
             }
             else if (product.Prices == null && productCreateDto.Prices == null)
             {
@@ -288,17 +278,11 @@ namespace API.Controllers
                 pricesNotChanged = false;
             }
 
-            return (String.Compare(product.Name, productCreateDto.Name) == 0)
-                    && (String.Compare(product.Description, productCreateDto.Description) == 0)
-                    && product.Price == productCreateDto.Price
-                    // && product.BulkPrice == productCreateDto.BulkPrice
-                    && (String.Compare(product.ProductTypeId, productCreateDto.ProductTypeId) == 0)
-                    && (String.Compare(product.ProductBrandId, productCreateDto.ProductBrandId) == 0)
-                    && (String.Compare(product.ProductCategoryId, productCreateDto.ProductCategoryId) == 0)
-                    && product.Stock == productCreateDto.Stock
-                    && (String.Compare(product.BarCode, productCreateDto.BarCode) == 0)
-                    && pricesNotChanged
-            ;
+            var comparer = new CompareEntities<Product>();
+            var productNotChanged = comparer.Equals(product, _mapper.Map<ProductCreateDto, Product>(productCreateDto));
+
+            return productNotChanged
+                    && pricesNotChanged;
         }
 
         private async Task<ImportFileResult> ImportPriceListFromFile(IFormFile importFile, ImportFileParameters parameters)
@@ -314,61 +298,73 @@ namespace API.Controllers
 
                 if (file == null) return null;
 
+                _productRepository.DeleteFromDisk(file);
+
                 var priceList = new PriceListForImport();
 
                 if (await priceList.Import(file) == true)
                 {
                     result.ProductsTotal = priceList.Offers.Count();
 
-                    var categoriesInDb = await _unitOfWork.Repository<ProductCategory>().ListAllAsync();
-
-                    foreach (var category in priceList.Categories)
-                    {
-
-                        ProductCategory categoryInDb = categoriesInDb.FirstOrDefault(c => c.Id == category.Id) ?? null;
-                        if (categoryInDb is null)
-                        {
-                            // create new category and save it to DB
-                            _unitOfWork.Repository<ProductCategory>().Add(category);
-
-                            var res = await _unitOfWork.Complete();
-
-                            if (res <= 0) result.CategoriesCreateErrors++;
-                            else result.CategoriesCreated++;
-                        }
-                        else
-                        {
-                            if (category == categoryInDb)
-                            {
-                                // don't update, category not changed
-                                result.CategoriesNotUpdated++;
-                            }
-                            else
-                            {
-                                // category changed, update
-                                var res = await this.UpdateCategory(category);
-
-                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
-                                {
-                                    result.CategoriesUpdateSuccess++;
-                                }
-                                else result.CategoriesUpdateErrors++;
-                            }
-                        }
-                    }
+                    _unitOfWork.Repository<Currency>().UpdateList(priceList.Currencies);
+                    _unitOfWork.Repository<PriceType>().UpdateList(priceList.PriceTypes);
+                    _unitOfWork.Repository<ProductCategory>().UpdateList(priceList.Categories);
+                    await _unitOfWork.Complete();
 
                     // import changed products to db
                     var productsInDb = await _unitOfWork.Repository<Product>().ListAllAsync();
 
-                    // // find a list of products presenting in DB but not presenting in import file
+                    // find a list of products presenting in DB but not presenting in import file
                     var notFoundProducts = new List<Product>(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
                     result.ProductsNotFound = notFoundProducts.Count;
+
+                    switch (parameters.NotFoundProduct)
+                    {
+                        case NotFoundProduct.NoStock:
+                            {
+                                foreach (var notFoundProduct in notFoundProducts)
+                                {
+                                    if (notFoundProduct.Stock > 0)
+                                    {
+                                        notFoundProduct.Stock = 0;
+
+                                        // var modifiedProduct = _mapper.Map<Product, ProductCreateDto>(notFoundProduct);
+
+                                        // TODO: save to db
+
+                                        // var res = await this.UpdateProduct(notFoundProduct.Id, modifiedProduct);
+                                        // if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                        // {
+                                        //     result.ProductsUpdateSuccess++;
+                                        // }
+
+                                        // else result.ProductsUpdateErrors++;
+
+                                    }
+                                }
+
+                                break;
+                            }
+                        case NotFoundProduct.Hide:
+                            {
+                                break;
+                            }
+                        case NotFoundProduct.Delete:
+                            {
+                                break;
+                            }
+                        case NotFoundProduct.Ignore:
+                        default:
+                            {
+                                break;
+                            }
+
+                    }
+
 
                     foreach (var offer in priceList.Offers)
                     {
                         var productCreate = _mapper.Map<OfferItem, ProductCreateDto>(offer);
-                        // if (!(productCreate.Prices.Any())) productCreate.Prices = null;
-                        // if (string.IsNullOrEmpty(productCreate.Description)) productCreate.Description = "";
 
                         Product productInDb = productsInDb.FirstOrDefault(x => x.ExternalId == productCreate.ExternalId) ?? null;
 
@@ -385,6 +381,13 @@ namespace API.Controllers
                         else // product exists 
                         {
                             productCreate.Id = productInDb.Id;
+                            if (productCreate.Prices.Any() && productCreate.Prices != null)
+                            {
+                                foreach (var price in productCreate.Prices)
+                                {
+                                    price.ProductId = productInDb.Id;
+                                }
+                            }
 
                             if (!EqualProductWithProductCreate(productInDb, productCreate, parameters))
                             {
@@ -414,8 +417,6 @@ namespace API.Controllers
                 return null;
             }
             return result;
-
         }
-
     }
 }

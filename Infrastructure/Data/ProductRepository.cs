@@ -24,6 +24,7 @@ namespace Infrastructure.Data
                 .Include(p => p.ProductType)
                 .Include(p => p.ProductBrand)
                 .Include(p => p.ProductCategory)
+                .Include(p => p.Prices)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
         }
@@ -34,6 +35,7 @@ namespace Infrastructure.Data
                 .Include(p => p.ProductType)
                 .Include(p => p.ProductBrand)
                 .Include(p => p.ProductCategory)
+                .Include(p => p.Prices)
                 .ToListAsync();
         }
 
@@ -63,7 +65,10 @@ namespace Infrastructure.Data
 
         public void DeleteFromDisk(ImportFile importFile)
         {
-            throw new NotImplementedException();
+            if (File.Exists(Path.Combine("wwwroot/import", importFile.FileName)))
+            {
+                File.Delete("wwwroot/import" + importFile.FileName);
+            }
         }
 
         public async Task<bool> UpdatePriceListInDatabase(PriceListForImport file)
@@ -88,5 +93,7 @@ namespace Infrastructure.Data
             string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
             return GenerateRandomId(chars, length);
         }
+
+
     }
 }

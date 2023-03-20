@@ -7,6 +7,11 @@ namespace Core.Entities
 {
     public class BaseEntity
     {
+        public BaseEntity()
+        {
+        }
+
         public string Id { get; set; }
+        
     }
 }

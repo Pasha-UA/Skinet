@@ -36,7 +36,7 @@ export class ShopService {
         this.pagination.data =
           this.products.slice((this.shopParams.pageNumber - 1) * this.shopParams.pageSize,
             this.shopParams.pageNumber * this.shopParams.pageSize);
-
+            console.log(this.products);
         return of(this.pagination);
       }
     }
@@ -182,6 +182,10 @@ export class ShopService {
     if (!Array.isArray(this.categories) || !this.categories.length) this.getCategories();
   
     return this.categories.filter(c=> c.parentId===categoryId).length
+  }
+
+  getPriceTypes () {
+    
   }
 
 }

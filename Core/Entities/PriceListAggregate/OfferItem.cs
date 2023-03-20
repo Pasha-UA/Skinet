@@ -16,8 +16,8 @@ namespace Core.Entities.PriceListAggregate
 
             public string RetailPriceCurrencyId { get; set; }
 
-            public List<PriceItem> PriceItems { get; set; }
-            public PriceItem BulkPrice { get; set; } // оптовая цена
+            public List<Price> Prices { get; set; }
+            public Price BulkPrice { get; set; } // оптовая цена
 
             public string CategoryId { get; set; }
 

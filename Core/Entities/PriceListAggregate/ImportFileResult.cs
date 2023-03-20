@@ -14,11 +14,37 @@ namespace Core.Entities.PriceListAggregate
         public int ProductsCreateErrors { get; set; } = 0;
         public int ProductsCreated { get; set; } = 0;
         public int ProductsNotFound { get; set; } = 0;
-        public int CategoriesCreated { get; set; } = 0;
-        public int CategoriesNotUpdated { get; set; } = 0; // not changed
-        public int CategoriesUpdateSuccess { get; set; } = 0;
-        public int CategoriesCreateErrors { get; set; } = 0;
-        public int CategoriesUpdateErrors { get; set; } = 0;
+        public List<ImportResult<Result>> ImportResult { get; set; } = new ();
     }
-    
+
+    public class Result : BaseEntity
+    {
+        public Result()
+        {
+            TotalFoundInFile = 0;
+            Created = 0;
+            NotUpdated = 0;
+            UpdateSuccess = 0;
+            CreateErrors = 0;
+            UpdateErrors = 0;
+        }
+        public int TotalFoundInFile { get; set; }
+        public int Created { get; set; }
+        public int NotUpdated { get; set; }
+        public int UpdateSuccess { get; set; }
+        public int CreateErrors { get; set; }
+        public int UpdateErrors { get; set; }
+        
+
+    }
+    public class ImportResult<T> : Result where T : Result
+    {
+        public ImportResult(string typeName)
+        {
+            this.TypeName = typeName;
+        }
+
+        public string TypeName { get; }
+    }
+
 }
