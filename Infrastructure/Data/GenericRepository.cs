@@ -53,6 +53,15 @@ namespace Infrastructure.Data
                 return entities;
 
             }
+
+            if (typeof(T) == typeof(PriceType))
+            {
+                var priceTypes = await _context.Set<PriceType>()
+                    .Include(p => p.Currency)
+                    .ToListAsync();
+            }
+
+
             return await _context.Set<T>().ToListAsync();
         }
 

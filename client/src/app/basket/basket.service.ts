@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { Basket, IBasket, IBasketItem, IBasketTotals } from '../shared/models/basket';
 import { IDeliveryMethod } from '../shared/models/deliveryMethod';
 import { IProduct } from '../shared/models/product';
+import { IProductPrice } from '../shared/models/productPrice';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +36,7 @@ export class BasketService {
     basket.deliveryMethodId = deliveryMethod.id;
     this.calculateTotals();
     this.setBasket(basket);
-    
+
   }
 
   setBasket(basket: IBasket) {
@@ -67,7 +68,11 @@ export class BasketService {
   incrementItemQuantity(item: IBasketItem) {
     const basket = this.getCurrentBasketValue();
     const foundItemIndex = basket.items.findIndex(x => x.id === item.id);
-    basket.items[foundItemIndex].quantity++;
+
+    
+    basket.items = this.addOrUpdateItem(basket.items, basket.items[foundItemIndex], basket.items[foundItemIndex].quantity++);
+
+    // basket.items[foundItemIndex].quantity++;
     this.setBasket(basket);
   }
 
@@ -75,13 +80,16 @@ export class BasketService {
     const basket = this.getCurrentBasketValue();
     const foundItemIndex = basket.items.findIndex(x => x.id === item.id);
     if (basket.items[foundItemIndex].quantity > 1) {
-      basket.items[foundItemIndex].quantity--;
+      basket.items = this.addOrUpdateItem(basket.items, basket.items[foundItemIndex], basket.items[foundItemIndex].quantity++);
+
+      // basket.items[foundItemIndex].quantity--;
       this.setBasket(basket);
     } else {
       this.removeItemFromBasket(item);
     }
 
   }
+
   removeItemFromBasket(item: IBasketItem) {
     const basket = this.getCurrentBasketValue();
     if (basket.items.some(x => x.id === item.id)) {
@@ -123,11 +131,15 @@ export class BasketService {
     }
     else {
       items[index].quantity += quantity;
+
+      // recalculate price 
+      items[index].price = this.calculateItemPrice(items[index], items[index].quantity).value;
     }
 
     return items;
 
   }
+
   private createBasket(): IBasket {
     const basket = new Basket();
     localStorage.setItem('basket_id', basket.id);
@@ -135,15 +147,36 @@ export class BasketService {
   }
 
   private mapProductItemToBasketItem(item: IProduct, quantity: number): IBasketItem {
+    // const prices = item.prices;
+
+    // const filteredPricesArr: IProductPrice[] = prices.filter((price) => price.priceType.quantity < quantity);
+
+    // const maxQuantity: number = Math.max(...filteredPricesArr.map((price) => price.priceType.quantity));
+    // const price: number = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity).value;
+
     return {
       id: item.id,
       name: item.name,
       brand: item.productBrand,
       type: item.productType,
-      price: item.price,
+      // price: item.price,
+      // price: price,
+      price: this.calculateItemPrice(item, quantity).value,
       pictureUrl: item.pictureUrl,
-      quantity
+      quantity,
+      prices: item.prices
     }
+  }
+
+  // calculates price for item dependent of quantity ordered
+  private calculateItemPrice(item: IProduct | IBasketItem, quantity: number): IProductPrice {
+    const prices = item.prices;
+    const filteredPricesArr: IProductPrice[] = prices.filter((price) => price.priceType.quantity < quantity);
+    const maxQuantity: number = Math.max(...filteredPricesArr.map((price) => price.priceType.quantity));
+    const price: IProductPrice = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity);
+    // const price: number = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity).value;
+
+    return price;
   }
 
   private calculateTotals() {

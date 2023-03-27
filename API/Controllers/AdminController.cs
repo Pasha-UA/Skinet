@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Dtos;
+using API.Errors;
 using AutoMapper;
 using Core.Entities.Identity;
 using Core.Entities.OrderAggregate;
@@ -112,7 +113,7 @@ namespace API.Controllers
         [Authorize]
         public ActionResult<IEnumerable<AppUser>> GetUsersForRole([FromQuery] string roleName)
         {
-//            List<UserDto>
+            //            List<UserDto>
             List<AppUser> users = new List<AppUser>();
             var role = _userRepository.GetRolesAsync().SingleOrDefault(r => r.Name.ToLower() == roleName.ToLower(), null);
             if (role != null)
@@ -130,6 +131,37 @@ namespace API.Controllers
             return Ok(statusList);
         }
 
+        [HttpPost("role")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IReadOnlyList<AppRole>>> CreateRole(AppRole role)
+        {
+            var roles = _userRepository.GetRolesAsync();
+
+            if (roles.Any())
+            {
+                if (roles.FirstOrDefault(r => r.Name.ToLower() == role.Name.ToLower()) != null)
+                {
+                    return BadRequest(new ApiResponse(400, "Role " + role.Name + " already exists"));
+                }
+            }
+
+            var result = await _userRepository.CreateRole(role);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new ApiResponse(400, result.Errors.Select(e => e.ToString()).ToArray()));
+            }
+
+            roles = _userRepository.GetRolesAsync();
+            return Ok(roles);
+        }
+
+
+        [HttpGet("roles")]        
+        public ActionResult<IReadOnlyList<AppRole>> GetRolesAsync()
+        {
+            return Ok(_userRepository.GetRolesAsync());
+        }
 
     }
 }

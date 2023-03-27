@@ -13,16 +13,19 @@ namespace Infrastructure.Data
     {
         private readonly AppIdentityDbContext _identityDbContext;
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<AppRole> _roleManager;
         private readonly SignInManager<AppUser> _signInManager;
 
         public UserRepository(
             AppIdentityDbContext identityDbContext,
             UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager)
+            SignInManager<AppUser> signInManager,
+            RoleManager<AppRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _identityDbContext = identityDbContext;
+            _roleManager = roleManager;
         }
 
         public IReadOnlyList<AppUser> GetUsersAsync()
@@ -51,19 +54,35 @@ namespace Infrastructure.Data
         public IEnumerable<AppRole> GetRolesForUser(AppUser user)
         {
             return GetUserRolesAsync().Where(x => x.UserId == user.Id)
-                .Join(GetRolesAsync(),ur=>ur.RoleId, r=>r.Id, (ur,r) => r);
+                .Join(GetRolesAsync(), ur => ur.RoleId, r => r.Id, (ur, r) => r);
         }
 
-        // public IEnumerable<AppUser> GetUsersForRole(AppRole role)
-        // {
-        //     throw new NotImplementedException();
-        // }
+        public async Task<IdentityResult> CreateRole(AppRole role)
+        {
+            var roles = this.GetRolesAsync();
+
+            if (!roles.Any())
+            {
+                role.Id = "1"; // default, if any role exists, create new Id
+            }
+            else
+            {
+                if (roles.FirstOrDefault(r => r.Name == role.Name) != null)
+                {
+                    return null;
+                }
+
+                role.Id = (roles.Max(r => Convert.ToInt32(r.Id)) + 1).ToString();
+            }
+
+            return await _roleManager.CreateAsync(role);
+        }
 
         public IEnumerable<AppUser> GetUsersForRole(AppRole role)
         {
             return GetUserRolesAsync().Where(x => x.RoleId == role.Id)
-                .Join(GetUsersAsync(),ur=>ur.UserId, u=>u.Id, (ur,u) => u);
+                .Join(GetUsersAsync(), ur => ur.UserId, u => u.Id, (ur, u) => u);
         }
-        
+
     }
 }

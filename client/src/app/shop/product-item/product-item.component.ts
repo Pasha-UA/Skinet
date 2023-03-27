@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BasketService } from 'src/app/basket/basket.service';
 import { IProduct } from 'src/app/shared/models/product';
+import { IProductPrice } from 'src/app/shared/models/productPrice';
 
 @Component({
   selector: 'app-product-item',
@@ -11,9 +12,18 @@ export class ProductItemComponent implements OnInit {
 
   @Input() product: IProduct;
 
+  productPrices: IProductPrice[];
+  retailPrice: IProductPrice;
+  bulkPrice: IProductPrice;
+
   constructor(private basketService: BasketService) { }
 
   ngOnInit(): void {
+    this.productPrices = this.product.prices
+        .filter(p => (p.priceType.isRetail || p.priceType.isBulk) == false)
+        .sort((a, b)=>(a.priceType.quantity-b.priceType.quantity));
+    this.retailPrice = this.product.prices.find(p => p.priceType.isRetail == true);
+    this.bulkPrice = this.product.prices.find(p => p.priceType.isBulk == true);
   }
 
   addItemToBasket() {

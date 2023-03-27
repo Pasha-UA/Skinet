@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Entities;
 using Core.Entities.Identity;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
@@ -60,6 +61,21 @@ namespace Infrastructure.Services
             return order;
 
         }
+        // private async Task<string> SetNextId()
+        // {
+        //     var roles = await _unitOfWork.Repository<T>().ListAllAsync();
+        //     int lastId = 0;
+        //     if (entities.Any())
+        //     {
+        //         lastId = entities.Max(o => Convert.ToInt32(o.Id));
+        //     }
+        //     return (lastId + 1).ToString();
+        // }
+
+        // public async Task<AppRole> CreateRole (AppRole role)
+        // {
+        //     role.Id = this.SetNextId<AppRole>();
+        // }
 
         // public async Task<IReadOnlyList<OrderStatus>> GetOrderStatusList()
         // {

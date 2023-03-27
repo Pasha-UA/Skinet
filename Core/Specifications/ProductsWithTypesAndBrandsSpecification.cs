@@ -21,9 +21,16 @@ namespace Core.Specifications
             AddInclude(x => x.ProductBrand);
             AddInclude(x => x.ProductCategory);
             AddInclude(x => x.Photos);
-            // AddInclude(x => x.BulkPrice);
-            AddInclude(x => x.Prices);
-            // AddInclude(x => x.Prices.Select(price => price.PriceType));
+            // AddInclude(x => productParams.ShowBulkPrice ? x.Prices : x.Prices.Where(p => p.PriceType.IsBulk != true));
+            if (productParams.ShowBulkPrice)
+            {
+                AddInclude(x => x.Prices);
+
+            }
+            else 
+            {
+                AddInclude(x=>x.Prices.Where(p => p.PriceType.IsBulk != true));
+            }
             AddOrderBy(x => x.Name);
             ApplyPaging(productParams.PageSize * (productParams.PageIndex - 1), productParams.PageSize);
 
@@ -51,7 +58,7 @@ namespace Core.Specifications
             AddInclude(x => x.ProductCategory);
             AddInclude(x => x.Photos);
             AddInclude(x => x.Prices);
-            
+
         }
     }
 }

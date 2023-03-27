@@ -15,5 +15,6 @@ namespace Core.Interfaces
         bool EmailConfirmationRequired(AppUser user);
         IEnumerable<AppRole> GetRolesForUser(AppUser user);
         IEnumerable<AppUser> GetUsersForRole(AppRole role);
+        Task<IdentityResult> CreateRole(AppRole role);
     }
 }

@@ -76,6 +76,13 @@ namespace API.Controllers
         }
 
         [Cached(1000)]
+        [HttpGet("pricetypes")]
+        public async Task<ActionResult<IReadOnlyList<PriceType>>> GetProductPriceTypes()
+        {
+            return Ok(await _unitOfWork.Repository<PriceType>().ListAllAsync());
+        }
+
+        [Cached(1000)]
         [HttpGet("categories")]
         public async Task<ActionResult<IReadOnlyList<ProductCategory>>> GetProductCategories()
         {

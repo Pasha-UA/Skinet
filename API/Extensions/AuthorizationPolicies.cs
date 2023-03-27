@@ -19,6 +19,8 @@ namespace API.Extensions
                     policy => policy.RequireRole("Manager"));
                 options.AddPolicy("AdminRoleClaim", policy =>
                    policy.RequireClaim("Role", "Admin"));
+                options.AddPolicy("PartnerRoleClaim", policy =>
+                   policy.RequireClaim("Role", "Partner"));
                 //                options.FallbackPolicy();
             });
 

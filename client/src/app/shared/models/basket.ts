@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { IProductPrice } from './productPrice';
 
 
 export interface IBasketItem {
@@ -9,6 +10,7 @@ export interface IBasketItem {
     pictureUrl: string;
     brand: string;
     type: string;
+    prices: IProductPrice[];
 }
 
 export interface IBasket {

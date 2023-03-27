@@ -1,3 +1,5 @@
+import { IProductPrice } from "./productPrice";
+
 export interface IProduct {
     id: string;
     name: string;
@@ -10,6 +12,8 @@ export interface IProduct {
     stock: string;
     barCode: string;
     photos: IPhoto[];
+    prices: IProductPrice[];
+    visible: boolean;
 }
 
 export interface IPhoto {
