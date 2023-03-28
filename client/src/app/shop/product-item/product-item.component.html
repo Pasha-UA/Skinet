@@ -17,9 +17,13 @@
     <div class="card-footer align-text-end">
         <span class="col-4" i18n>Цена</span><span>: </span>
         <span class="mb-2 col-4">{{retailPrice.value| currency:'UAH':'symbol'}}</span>
-        <div *ngIf="productPrices.length>0">
+        <div *ngIf="productPrices.length>1">
             <span>Оптовые цены:</span>
-            <div *ngFor="let price of productPrices">от {{price.priceType.quantity}}шт <span>: </span> {{price.value}}</div>
+            <div *ngFor="let price of productPrices">
+                <div *ngIf="!price.priceType.isRetail">
+                    от {{price.priceType.quantity}}шт <span>: </span> {{price.value}}
+                </div>
+            </div>
         </div>
     </div>
     <div class="ms-3 fs-xs">

@@ -31,7 +31,22 @@ namespace Infrastructure.Services
             {
                 var productItem = await _unitOfWork.Repository<Product>().GetByIdAsync(item.Id);
                 var itemOrdered = new ProductItemOrdered(productItem.Id, productItem.Name, productItem.Photos.FirstOrDefault(x => x.IsMain)?.PictureUrl);
-                var orderItem = new OrderItem(itemOrdered, productItem.Price, item.quantity);
+
+                var productPrice = 0m;
+                if (productItem.Prices !=null && productItem.Prices.Count>0)
+                {
+                    // вычисление цены товара в зависимости от заказанного количества
+                    var filteredPrices = productItem.Prices.Where(x=>x.PriceType.Quantity <= item.quantity);
+                    var maxQuantity = filteredPrices.Max(x=>x.PriceType.Quantity);
+                    productPrice = filteredPrices.FirstOrDefault(x=>x.PriceType.Quantity==maxQuantity).Value;
+                }
+                else
+                // временно, пока не избавился от поля Product.Price 
+                {
+                    productPrice = productItem.Price;
+                }
+                // var orderItem = new OrderItem(itemOrdered, productItem.Price, item.quantity);
+                var orderItem = new OrderItem(itemOrdered, productPrice, item.quantity);
                 orderItem.Id = nextOrderItemId;
                 nextOrderItemId = (Convert.ToInt32(nextOrderItemId) + 1).ToString(); // not safe...
                 items.Add(orderItem);

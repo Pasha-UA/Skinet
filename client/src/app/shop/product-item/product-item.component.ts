@@ -20,13 +20,15 @@ export class ProductItemComponent implements OnInit {
 
   ngOnInit(): void {
     this.productPrices = this.product.prices
-        .filter(p => (p.priceType.isRetail || p.priceType.isBulk) == false)
+        // .filter(p => (p.priceType.isRetail || p.priceType.isBulk) == false)
+        .filter(p => (p.priceType.isBulk) == false)
         .sort((a, b)=>(a.priceType.quantity-b.priceType.quantity));
     this.retailPrice = this.product.prices.find(p => p.priceType.isRetail == true);
     this.bulkPrice = this.product.prices.find(p => p.priceType.isBulk == true);
   }
 
   addItemToBasket() {
+    console.log(this.product);
     this.basketService.addItemToBasket(this.product);
   }
 

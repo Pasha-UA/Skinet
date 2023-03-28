@@ -1,3 +1,5 @@
+using Core.Entities.PriceListAggregate;
+
 namespace Core.Entities
 {
     public class BasketItem
@@ -9,5 +11,6 @@ namespace Core.Entities
         public string PictureUrl { get; set; }
         public string Brand { get; set; }
         public string Type { get; set; }
+        public Price[] Prices { get; set; }
     }
 }
