@@ -77,7 +77,8 @@ namespace Infrastructure.Data
             return true;
         }
 
-        public string GenerateRandomId(string chars, int length)
+        /// generates random id using parameter length and chars 'abcdefghijklmnopqrstuvwxyz0123456789'
+        public string GenerateRandomId(int length, string chars = "abcdefghijklmnopqrstuvwxyz0123456789")
         {
             var random = new Random();
             string uniqueId = new string(
@@ -86,14 +87,7 @@ namespace Infrastructure.Data
                           .ToArray());
             return uniqueId;
         }
-
-        /// generates random id using parameter length and chars 'abcdefghijklmnopqrstuvwxyz0123456789'
-        public string GenerateRandomId(int length)
-        {
-            string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-            return GenerateRandomId(chars, length);
-        }
-
+ 
 
     }
 }

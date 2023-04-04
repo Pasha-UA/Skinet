@@ -16,6 +16,7 @@ using Core.Entities.Comparers;
 using Core.Entities.PriceListAggregate;
 using System.Security.Cryptography;
 using System.Reflection;
+using System.Text;
 
 namespace API.Controllers
 {
@@ -35,9 +36,22 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
-            [FromQuery] ProductSpecParams productParams)
+        public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts([FromQuery] ProductSpecParams productParams)
         {
+            if (productParams.CategoryId != null)
+            {
+                if (productParams.IncludeSubCategories)
+                {
+                    var subcategories = await _unitOfWork.Repository<ProductCategory>().GetAllChildrenCategoriesAsync(productParams.CategoryId);
+                    if (subcategories == null)
+                    {
+                        return NotFound(new ApiResponse(404, "Category not found"));
+                    }
+                    productParams.CategoryId = null;
+                    productParams.Subcategories = subcategories.Select(c => c.Id).ToArray();
+                }
+            }
+
             var spec = new ProductsWithTypesAndBrandsSpecification(productParams);
 
             var countSpec = new ProductWithFiltersForCountSpecification(productParams);
@@ -89,6 +103,22 @@ namespace API.Controllers
             return Ok(await _unitOfWork.Repository<ProductCategory>().ListAllAsync());
         }
 
+        [Cached(1000)]
+        [HttpGet("subcategories/{id?}")]
+        public async Task<ActionResult<IReadOnlyList<string>>> GetAllSubcategories(string id)
+        {
+            var allCategories = await _unitOfWork.Repository<ProductCategory>().GetAllChildrenCategoriesAsync(id);
+
+            if (allCategories == null)
+            {
+                return NotFound(new ApiResponse(404, new String($"Category with Id='{id}' not found.")));
+            }
+
+            var subcategories = allCategories.Select(c => c.Id).ToList();
+
+            return Ok(subcategories);
+        }
+
 
         [Cached(1000)]
         [HttpGet("types")]
@@ -130,6 +160,7 @@ namespace API.Controllers
 
             return Ok(product);
         }
+
         // public async Task<ActionResult<Product>> UpdateProduct(Product productToUpdate)
         // {
         //     var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productToUpdate.Id);
@@ -425,5 +456,7 @@ namespace API.Controllers
             }
             return result;
         }
+
+
     }
 }

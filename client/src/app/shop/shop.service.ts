@@ -36,7 +36,7 @@ export class ShopService {
         this.pagination.data =
           this.products.slice((this.shopParams.pageNumber - 1) * this.shopParams.pageSize,
             this.shopParams.pageNumber * this.shopParams.pageSize);
-            console.log(this.products);
+        console.log(this.products);
         return of(this.pagination);
       }
     }
@@ -58,6 +58,11 @@ export class ShopService {
     if (this.shopParams.categoryId) {
       params = params.append('categoryId', this.shopParams.categoryId);
     }
+
+    if (this.shopParams.includeSubcategories) {
+      params = params.append('IncludeSubCategories', true);
+    }
+
 
     params = params.append('sort', this.shopParams.sort);
     params = params.append('pageIndex', this.shopParams.pageNumber.toString());
@@ -165,10 +170,36 @@ export class ShopService {
     return undefined;
   }
 
-  getChildrenProductsCount(categoryId: string) {
+  // getDirectChildrenProductsCount(categoryId: string) {
+  //   let params = this.getShopParams();
+  //   params.categoryId = categoryId;
+  //   params.includeSubcategories = false;
+  //   let productsCount = this.getProducts(true).pipe(
+  //     map(response => {
+  //       return response.count
+  //     })
+  //   );
 
+  //   return productsCount;
+  // }
+
+  // getTotalChildrenProductsCount(categoryId: string) {
+  //   let params = this.getShopParams();
+  //   params.categoryId = categoryId;
+  //   params.includeSubcategories = true;
+  //   let productsCount = this.getProducts(true).pipe(
+  //     map(response => {
+  //       return response.count
+  //     })
+  //   );
+
+  //   return productsCount;
+  // }
+
+  getChildrenProductsCount(categoryId: string, includeSubcategories: boolean = true) {
     let params = this.getShopParams();
     params.categoryId = categoryId;
+    params.includeSubcategories = includeSubcategories;
     let productsCount = this.getProducts(true).pipe(
       map(response => {
         return response.count
@@ -180,12 +211,12 @@ export class ShopService {
 
   getChildrenCategoriesCount(categoryId: string) {
     if (!Array.isArray(this.categories) || !this.categories.length) this.getCategories();
-  
-    return this.categories.filter(c=> c.parentId===categoryId).length
+
+    return this.categories.filter(c => c.parentId === categoryId).length
   }
 
-  getPriceTypes () {
-    
+  getPriceTypes() {
+
   }
 
 }

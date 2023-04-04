@@ -14,6 +14,7 @@ namespace Core.Interfaces
         void Update (T entity);
         void Delete (T entity);
         void UpdateList(T[] entities);
+        Task<IReadOnlyList<ProductCategory>> GetAllChildrenCategoriesAsync(string id);
 
     }
 }

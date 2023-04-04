@@ -59,18 +59,14 @@ export class BasketService {
   }
 
   addItemToBasket(item: IProduct, quantity = 1) {
-    console.log(item);
     const itemToAdd: IBasketItem = this.mapProductItemToBasketItem(item, quantity);
-    console.log(itemToAdd);
     const basket = this.getCurrentBasketValue() ?? this.createBasket();
     basket.items = this.addOrUpdateItem(basket.items, itemToAdd, quantity);
-    console.log(basket.items);
     this.setBasket(basket);
   }
 
   incrementItemQuantity(item: IBasketItem) {
     const basket = this.getCurrentBasketValue();
-    console.log(basket);
     const foundItemIndex = basket.items.findIndex(x => x.id === item.id);
 
     basket.items = this.addOrUpdateItem(basket.items, basket.items[foundItemIndex], 1);
@@ -80,9 +76,7 @@ export class BasketService {
   }
 
   decrementItemQuantity(item: IBasketItem) {
-    console.log(item);
     const basket = this.getCurrentBasketValue();
-    console.log(basket);
     const foundItemIndex = basket.items.findIndex(x => x.id === item.id);
     if (basket.items[foundItemIndex].quantity > 1) {
       basket.items = this.addOrUpdateItem(basket.items, basket.items[foundItemIndex], -1);
@@ -129,9 +123,6 @@ export class BasketService {
 
 
   private addOrUpdateItem(items: IBasketItem[], itemToAdd: IBasketItem, quantity: number): IBasketItem[] {
-    console.log(items);
-    console.log(itemToAdd);
-    console.log(quantity);
     const index = items.findIndex(i => i.id === itemToAdd.id);
     if (index === -1) {
       itemToAdd.quantity = quantity;
@@ -141,12 +132,8 @@ export class BasketService {
       items[index].quantity += quantity;
 
       // recalculate price 
-      console.log(items[index].price);
       const recalculatedPrice = this.calculateItemPrice(items[index], items[index].quantity).value; 
-      console.log(recalculatedPrice);
-      console.log(items[index]);
       items[index].price = recalculatedPrice;
-      console.log(items[index].price);
     }
 
     return items;
@@ -160,9 +147,6 @@ export class BasketService {
   }
 
   private mapProductItemToBasketItem(item: IProduct, quantity: number): IBasketItem {
-
-    console.log(item);
-
     const basketItem: IBasketItem = {
       id: item.id,
       name: item.name,
@@ -175,7 +159,6 @@ export class BasketService {
       quantity,
       prices: item.prices
     }
-    console.log(basketItem);
 
     return basketItem;
   }
@@ -183,21 +166,15 @@ export class BasketService {
   // calculates price for item dependent of quantity ordered
   private calculateItemPrice(item: IProduct | IBasketItem, quantity: number): IProductPrice {
     let price: IProductPrice;
-    console.log(item, quantity);
     if (item.prices && item.prices.length > 0) {
-      console.log(item, quantity);
       const prices = item.prices;
-      console.log(prices);
       const filteredPricesArr: IProductPrice[] = prices.filter((price) => price.priceType.quantity <= quantity);
-      console.log(filteredPricesArr);
       const maxQuantity: number = Math.max(...filteredPricesArr.map((price) => price.priceType.quantity));
-      console.log(maxQuantity);
       price = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity);
-      console.log(price);
       // const price: number = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity).value;
     }
     else {
-      
+      price = item.prices.find(x=>x.priceType.quantity==1);
     }
 
     return price;

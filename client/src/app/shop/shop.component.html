@@ -49,8 +49,8 @@
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" *ngIf="childrenCategories">
                 <div class="col mb-4">
-                    <div class="card" *ngFor="let subcat of childrenCategories">
-                        <app-product-category-item [category]="subcat"></app-product-category-item>
+                    <div class="card" *ngFor="let subcategory of childrenCategories">
+                        <app-product-category-item [category]="subcategory"></app-product-category-item>
                     </div>
 
                 </div>

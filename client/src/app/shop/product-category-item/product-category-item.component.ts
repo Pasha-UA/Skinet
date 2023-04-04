@@ -9,17 +9,23 @@ import { ShopService } from '../shop.service';
 })
 export class ProductCategoryItemComponent implements OnInit {
   @Input() category: ICategory;
-  childProductCount: number;
+  // childProductCount: number;
   childCategoryCount: number;
+  totalChildProductsCount: number;
 
   constructor(private shopService: ShopService) { }
 
   ngOnInit(): void {
-    this.shopService.getChildrenProductsCount(this.category.id).subscribe({
-      next: response => this.childProductCount=response
-    });
+    // this.shopService.getDirectChildrenProductsCount(this.category.id).subscribe({
+    //   next: response => this.childProductCount = response
+    // });
 
     this.childCategoryCount = this.shopService.getChildrenCategoriesCount(this.category.id);
+
+    this.shopService.getChildrenProductsCount(this.category.id).subscribe({
+      next: response => this.totalChildProductsCount = response
+    })
+
   }
 
 }

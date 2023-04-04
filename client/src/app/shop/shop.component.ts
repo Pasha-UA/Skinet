@@ -110,7 +110,7 @@ export class ShopComponent implements OnInit {
     })
   }
 
-  findChildren(tree: ICategoryTree[], id: string): ICategoryTree[] {
+  findChildrenCategories(tree: ICategoryTree[], id: string): ICategoryTree[] {
     return this.shopService.getChildrenCategories(this.categoriesTree, id);
   }
 
@@ -169,7 +169,7 @@ export class ShopComponent implements OnInit {
 
     this.shopService.setShopParams(params);
 
-    this.childrenCategories = this.findChildren(this.categoriesTree, event);
+    this.childrenCategories = this.findChildrenCategories(this.categoriesTree, event);
 
     this.getProducts();
   }

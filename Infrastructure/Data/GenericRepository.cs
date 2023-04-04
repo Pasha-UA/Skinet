@@ -61,9 +61,9 @@ namespace Infrastructure.Data
                     .ToListAsync();
             }
 
-
             return await _context.Set<T>().ToListAsync();
         }
+
 
         public async Task<T> GetEntityWithSpec(ISpecification<T> spec)
         {
@@ -120,6 +120,41 @@ namespace Infrastructure.Data
         public void Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
+        }
+
+        public async Task<IReadOnlyList<ProductCategory>> GetAllChildrenCategoriesAsync(string id)
+        {
+            var allCategories = await _context.Set<ProductCategory>().ToListAsync();
+
+            if (string.IsNullOrEmpty(id))
+            {
+                return allCategories;
+            }
+
+            if (allCategories == null || allCategories.FirstOrDefault(c => c.Id == id) == null)
+            {
+                return null;
+            }
+
+            var children = new List<ProductCategory> { allCategories.FirstOrDefault(c => c.Id == id) }; // add the main category to the list
+
+            Action<string> getChildren = null;
+            getChildren = (id) =>
+            {
+                var subChildren = allCategories.Where(c => c.ParentId == id);
+                if (subChildren != null && subChildren.Any())
+                {
+                    children.AddRange(subChildren);
+                    foreach (var child in subChildren)
+                    {
+                        getChildren(child.Id);
+                    }
+                }
+            };
+
+            getChildren(id);
+
+            return children;
         }
 
         public async void UpdateList(T[] entities)

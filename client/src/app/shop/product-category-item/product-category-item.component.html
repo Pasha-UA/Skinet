@@ -2,5 +2,6 @@
 <div>{{category.name}}</div>
 <div>
     <span *ngIf="childCategoryCount>0">categories: {{childCategoryCount}}</span>
-    <span *ngIf="childProductCount>0">products: {{childProductCount}}</span>    
+    <!-- <span *ngIf="childProductCount>0">products: {{childProductCount}}</span>     -->
+    <span *ngIf="totalChildProductsCount>0">Products: {{totalChildProductsCount}}</span>    
 </div>

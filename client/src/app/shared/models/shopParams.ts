@@ -6,4 +6,5 @@ export class ShopParams {
     pageSize = 6;
     search: string;
     categoryId: string;
+    includeSubcategories = true;
 }
