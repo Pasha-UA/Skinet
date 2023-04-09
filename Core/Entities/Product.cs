@@ -1,4 +1,5 @@
 using Core.Entities.PriceListAggregate;
+using Core.Interfaces;
 
 namespace Core.Entities
 {
@@ -24,7 +25,8 @@ namespace Core.Entities
         public IReadOnlyList<Photo> Photos => _photos.AsReadOnly();
         public int Stock { get; set; } = 0;
         public string BarCode { get; set; }
-        // public bool Visible { get; set; }
+        public bool Visible { get; set; } = true;
+        public bool Deleted { get; set; } = false; // product is deleted, db to remove it after some term
 
         public void AddPhoto(string pictureUrl, string fileName, bool isMain = false)
         {
@@ -61,11 +63,10 @@ namespace Core.Entities
             }
         }
 
-        // new fields
+        // new properties
         //        public string ShortDescription { get; set; }
         //        public string BasicUnit { get; set; }
-        //        public List<Price> WholesalePrices { get; set; }
-        //        public List<AdditionalField> AdditionalFields {get;set;}
+        //        public List<AdditionalPropertie> AdditionalProperties {get;set;}
 
         public static bool operator ==(Product a, Product b)
         {

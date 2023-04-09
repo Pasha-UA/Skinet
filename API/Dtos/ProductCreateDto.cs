@@ -35,9 +35,10 @@ namespace API.Dtos
 
         [Required]
         public string BarCode { get; set; }
-
         public List<Price> Prices { get; set; }
-       
+        public bool Visible { get; set; }
+        public bool Deleted { get; set; }
+
         // public PriceItem BulkPrice { get; set; }
     }
 }

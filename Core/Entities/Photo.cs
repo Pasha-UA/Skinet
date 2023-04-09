@@ -12,5 +12,7 @@ namespace Core.Entities
         public bool IsMain { get; set; }
         public Product Product { get; set; }
         public string ProductId { get; set; }
+        public ProductCategory ProductCategory { get; set; }
+        public string ProductCategoryId { get; set; }
     }
 }

@@ -22,6 +22,7 @@ namespace Core.Specifications
         public string[] Subcategories { get; set; } = null;
         public string Sort { get; set; }
         public bool ShowBulkPrice { get; set; } = false;
+        public bool VisibleOnly { get; set; } = true;
         private string _search;
         public string Search
         {

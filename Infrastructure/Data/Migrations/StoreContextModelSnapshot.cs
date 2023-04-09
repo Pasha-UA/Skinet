@@ -149,10 +149,16 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("PictureUrl")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ProductCategoryId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ProductId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductCategoryId")
+                        .IsUnique();
 
                     b.HasIndex("ProductId");
 
@@ -217,6 +223,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("BarCode")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -243,6 +252,9 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Stock")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Visible")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -381,11 +393,17 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Entities.Photo", b =>
                 {
+                    b.HasOne("Core.Entities.ProductCategory", "ProductCategory")
+                        .WithOne("Photo")
+                        .HasForeignKey("Core.Entities.Photo", "ProductCategoryId");
+
                     b.HasOne("Core.Entities.Product", "Product")
                         .WithMany("Photos")
                         .HasForeignKey("ProductId");
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductCategory");
                 });
 
             modelBuilder.Entity("Core.Entities.PriceListAggregate.Price", b =>
@@ -442,6 +460,11 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Photos");
 
                     b.Navigation("Prices");
+                });
+
+            modelBuilder.Entity("Core.Entities.ProductCategory", b =>
+                {
+                    b.Navigation("Photo");
                 });
 #pragma warning restore 612, 618
         }

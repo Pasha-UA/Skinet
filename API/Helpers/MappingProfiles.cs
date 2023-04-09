@@ -66,6 +66,9 @@ namespace API.Helpers
                 .ForMember(d => d.Id, o => o.Ignore())
                 ;
 
+            CreateMap<Product, ProductCreateDto>()
+                ;
+
             CreateMap<Photo, PhotoToReturnDto>()
                 .ForMember(d => d.PictureUrl,
                     o => o.MapFrom<PhotoUrlResolver>());

@@ -132,49 +132,27 @@ namespace API.Controllers
         [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<Product>> CreateProduct(ProductCreateDto productToCreate)
         {
-            var product = _mapper.Map<ProductCreateDto, Product>(productToCreate);
-            product.Id = _productRepository.GenerateRandomId(10);
+            var result = await this.ProductCreate(productToCreate);
 
-            _unitOfWork.Repository<Product>().Add(product);
+            if (result.Item1 <= 0) return BadRequest(new ApiResponse(400, "Problem creating product"));
 
-            var result = await _unitOfWork.Complete();
+            var createdProduct = result.Item2;
 
-            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem creating product"));
-
-            return Ok(product);
+            return Ok(createdProduct);
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin, Manager")]
         public async Task<ActionResult<Product>> UpdateProduct(string id, ProductCreateDto productToUpdate)
         {
-            var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
+            var result = await this.ProductUpdate(id, productToUpdate);
 
-            _mapper.Map(productToUpdate, product);
+            if (result.Item1 <= 0) return BadRequest(new ApiResponse(400, "Problem updating product"));
 
-            _unitOfWork.Repository<Product>().Update(product);
+            var updatedProduct = result.Item2;
 
-            var result = await _unitOfWork.Complete();
-
-            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating product"));
-
-            return Ok(product);
+            return Ok(updatedProduct);
         }
-
-        // public async Task<ActionResult<Product>> UpdateProduct(Product productToUpdate)
-        // {
-        //     var product = await _unitOfWork.Repository<Product>().GetByIdAsync(productToUpdate.Id);
-
-        //     // _mapper.Map(productToUpdate, product);
-
-        //     _unitOfWork.Repository<Product>().Update(product);
-
-        //     var result = await _unitOfWork.Complete();
-
-        //     if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating product"));
-
-        //     return Ok(product);
-        // }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
@@ -334,7 +312,8 @@ namespace API.Controllers
                 // read file
                 var file = await _productRepository.SaveToDiskAsync(importFile);
 
-                if (file == null) return null;
+                if (file == null)
+                    return null;
 
                 _productRepository.DeleteFromDisk(file);
 
@@ -354,51 +333,44 @@ namespace API.Controllers
 
                     // find a list of products presenting in DB but not presenting in import file
                     var notFoundProducts = new List<Product>(productsInDb.Where(p => priceList.Offers.All(offer => offer.Id != p.ExternalId)));
+
                     result.ProductsNotFound = notFoundProducts.Count;
 
-                    switch (parameters.NotFoundProduct)
+                    if (parameters.NotFoundProduct != NotFoundProduct.Ignore)
                     {
-                        case NotFoundProduct.NoStock:
+                        foreach (var product in notFoundProducts)
+                        {
+                            switch (parameters.NotFoundProduct)
                             {
-                                foreach (var notFoundProduct in notFoundProducts)
-                                {
-                                    if (notFoundProduct.Stock > 0)
-                                    {
-                                        notFoundProduct.Stock = 0;
+                                case NotFoundProduct.Hide:
+                                    product.Visible = false;
+                                    break;
 
-                                        // var modifiedProduct = _mapper.Map<Product, ProductCreateDto>(notFoundProduct);
+                                case NotFoundProduct.Delete:
+                                    product.Deleted = false;
+                                    break;
 
-                                        // TODO: save to db
+                                case NotFoundProduct.NoStock:
+                                    product.Stock = 0;
+                                    break;
 
-                                        // var res = await this.UpdateProduct(notFoundProduct.Id, modifiedProduct);
-                                        // if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
-                                        // {
-                                        //     result.ProductsUpdateSuccess++;
-                                        // }
-
-                                        // else result.ProductsUpdateErrors++;
-
-                                    }
-                                }
-
-                                break;
-                            }
-                        case NotFoundProduct.Hide:
-                            {
-                                break;
-                            }
-                        case NotFoundProduct.Delete:
-                            {
-                                break;
-                            }
-                        case NotFoundProduct.Ignore:
-                        default:
-                            {
-                                break;
+                                default:
+                                    break;
                             }
 
+                            var modifiedProduct = _mapper.Map<Product, ProductCreateDto>(product);
+
+                            var res = await this.ProductUpdate(product.Id, modifiedProduct);
+
+                            if (res.Item1 > 0)
+                            {
+                                result.ProductsUpdateSuccess++;
+                            }
+
+                            else result.ProductsUpdateErrors++;
+
+                        }
                     }
-
 
                     foreach (var offer in priceList.Offers)
                     {
@@ -409,16 +381,18 @@ namespace API.Controllers
                         if (productInDb is null) // no such product in db
                         {
                             // create new product and save it to DB
-                            var res = await this.CreateProduct(productCreate);
-                            if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                            var res = await this.ProductCreate(productCreate);
+
+                            if (res.Item1 > 0)
                             {
                                 result.ProductsCreated++;
                             }
                             else result.ProductsCreateErrors++;
                         }
-                        else // product exists 
+                        else // product exists
                         {
                             productCreate.Id = productInDb.Id;
+
                             if (productCreate.Prices.Any() && productCreate.Prices != null)
                             {
                                 foreach (var price in productCreate.Prices)
@@ -429,8 +403,8 @@ namespace API.Controllers
 
                             if (!EqualProductWithProductCreate(productInDb, productCreate, parameters))
                             {
-                                var res = await this.UpdateProduct(productCreate.Id, productCreate);
-                                if (res.Result is OkObjectResult okObjectResult && okObjectResult.StatusCode == 200)
+                                var res = await this.ProductUpdate(productCreate.Id, productCreate);
+                                if (res.Item1 > 0)
                                 {
                                     result.ProductsUpdateSuccess++;
                                 }
@@ -455,6 +429,32 @@ namespace API.Controllers
                 return null;
             }
             return result;
+        }
+
+        private async Task<(int, Product)> ProductCreate(ProductCreateDto productToCreate)
+        {
+            var product = _mapper.Map<ProductCreateDto, Product>(productToCreate);
+
+            product.Id = _productRepository.GenerateRandomId(10);
+
+            _unitOfWork.Repository<Product>().Add(product);
+
+            var result = await _unitOfWork.Complete();
+
+            return (result, product);
+        }
+
+        private async Task<(int, Product)> ProductUpdate(string id, ProductCreateDto productToUpdate)
+        {
+            var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
+
+            _mapper.Map(productToUpdate, product);
+
+            _unitOfWork.Repository<Product>().Update(product);
+
+            var result = await _unitOfWork.Complete();
+
+            return (result, product);
         }
 
 

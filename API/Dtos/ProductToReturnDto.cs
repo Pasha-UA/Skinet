@@ -20,6 +20,9 @@ namespace API.Dtos
         public string Stock { get; set; }
         public IEnumerable<PhotoToReturnDto> Photos { get; set; }
         public IEnumerable<Price> Prices { get; set; }
+        public bool Visible { get; set; }
+        public bool Deleted { get; set; }
+        
         // public PriceItem BulkPrice { get; set; }
     }
 }

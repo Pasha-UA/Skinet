@@ -9,5 +9,23 @@ namespace Core.Entities
     {
         public string ParentId { get; set; }
         public string Name { get; set; }
+        public Photo Photo { get; set; }
+
+        public void AddPhoto(string pictureUrl, string fileName, bool isMain = false)
+        {
+            var photo = new Photo
+            {
+                FileName = fileName,
+                PictureUrl = pictureUrl
+            };
+
+            this.Photo = photo;
+        }
+
+        public void RemovePhoto(string id)
+        {
+            this.Photo = null;
+        }
+
     }
 }
