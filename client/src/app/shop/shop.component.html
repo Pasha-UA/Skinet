@@ -44,13 +44,17 @@
                         placeholder="Search..." type="text">
                     <button (click)="onSearch()" class="btn btn-outline-primary mb-2">Search</button>
                     <button (click)="onReset()" class="btn btn-outline-success ms-2 mb-2">Reset</button>
+                    <input id="searchInCategoryCheckbox" type="checkbox" [(ngModel)]="searchInCategory">
+                    <label for="searchInCategoryCheckbox">search Inside Category</label>
                 </div>
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" *ngIf="childrenCategories">
                 <div class="col mb-4">
                     <div class="card" *ngFor="let subcategory of childrenCategories">
-                        <app-product-category-item [category]="subcategory"></app-product-category-item>
+                        <app-product-category-item [category]="subcategory"
+                            (categorySelected)="onCategorySelect($event)">
+                        </app-product-category-item>
                     </div>
 
                 </div>

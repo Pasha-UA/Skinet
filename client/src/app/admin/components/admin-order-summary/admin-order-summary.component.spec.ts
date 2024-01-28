@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AdminOrderSummaryComponent } from './admin-order-summary.component';
 
 describe('AdminOrderSummaryComponent', () => {
@@ -8,9 +8,12 @@ describe('AdminOrderSummaryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AdminOrderSummaryComponent ]
+      imports: [
+        HttpClientTestingModule
+      ],
+      declarations: [AdminOrderSummaryComponent]
     })
-    .compileComponents();
+      .compileComponents();
   });
 
   beforeEach(() => {

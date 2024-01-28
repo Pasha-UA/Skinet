@@ -281,7 +281,6 @@ namespace API.Controllers
             {
                 var comparerPrice = new CompareEntities<Price>();
                 pricesNotChanged = product.Prices.OrderBy(p => p.PriceTypeId).SequenceEqual(productCreateDto.Prices.OrderBy(p => p.PriceTypeId), comparerPrice);
-                // pricesNotChanged = product.Prices.OrderBy(p => p.PriceTypeId).SequenceEqual(productCreateDto.Prices.OrderBy(p => p.PriceTypeId));
             }
             else if (product.Prices == null && productCreateDto.Prices == null)
             {
@@ -346,12 +345,13 @@ namespace API.Controllers
                                     product.Visible = false;
                                     break;
 
-                                case NotFoundProduct.Delete:
-                                    product.Deleted = false;
+                                case NotFoundProduct.Delete: // safe delete
+                                    product.DeletedOn = DateTime.Now;
                                     break;
 
                                 case NotFoundProduct.NoStock:
                                     product.Stock = 0;
+                                    product.Visible = true;
                                     break;
 
                                 default:
@@ -448,7 +448,9 @@ namespace API.Controllers
         {
             var product = await _unitOfWork.Repository<Product>().GetByIdAsync(id);
 
-            _mapper.Map(productToUpdate, product);
+            // _mapper.Map(productToUpdate, product);
+
+            product = _mapper.Map<ProductCreateDto, Product>(productToUpdate);
 
             _unitOfWork.Repository<Product>().Update(product);
 

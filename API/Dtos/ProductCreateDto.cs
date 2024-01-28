@@ -14,10 +14,10 @@ namespace API.Dtos
         [Required]
         public string Description { get; set; }
 
-        [Required]
-        [RegularExpression(@"^\$?([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?$",
-            ErrorMessage = "Price must be a decimal (e.g 20.30)")]
-        public decimal Price { get; set; }
+        // [Required]
+        // [RegularExpression(@"^\$?([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?$",
+        //     ErrorMessage = "Price must be a decimal (e.g 20.30)")]
+        // public decimal Price { get; set; }
 
         public string PictureUrl { get; set; }
 
@@ -37,7 +37,7 @@ namespace API.Dtos
         public string BarCode { get; set; }
         public List<Price> Prices { get; set; }
         public bool Visible { get; set; }
-        public bool Deleted { get; set; }
+        public DateTime DeletedOn { get; set; }
 
         // public PriceItem BulkPrice { get; set; }
     }

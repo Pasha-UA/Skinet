@@ -8,7 +8,7 @@ namespace Core.Entities
         public string ExternalId { get; set; } // id in external db. used for import
         public string Name { get; set; }
         public string Description { get; set; }
-        public decimal Price { get; set; } // TODO: change type to 'Price'
+        // public decimal Price { get; set; } // TODO: change type to 'Price'
         // public string PriceItemId { get; set; }
         // private readonly List<PriceItem> _prices = new List<PriceItem>();
         // public virtual IList<ProductPrice> ProductsPrices {get; set;}
@@ -26,7 +26,9 @@ namespace Core.Entities
         public int Stock { get; set; } = 0;
         public string BarCode { get; set; }
         public bool Visible { get; set; } = true;
-        public bool Deleted { get; set; } = false; // product is deleted, db to remove it after some term
+
+         // product is deleted, db to remove it after some term
+        public DateTime DeletedOn { get; set; } = DateTime.MinValue;
 
         public void AddPhoto(string pictureUrl, string fileName, bool isMain = false)
         {

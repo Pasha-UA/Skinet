@@ -31,6 +31,7 @@
     "ng-bootstrap": "^0.46.0",
     "ng2-currency-mask": "^13.0.3",
     "ngx-bootstrap": "^8.0.0",
+    "ngx-cookie-service": "^13.2.1",
     "ngx-dropzone": "^3.1.0",
     "ngx-image-cropper": "^6.2.2",
     "ngx-pagination": "^6.0.3",

@@ -43,7 +43,7 @@ namespace Infrastructure.Services
                 else
                 // временно, пока не избавился от поля Product.Price 
                 {
-                    productPrice = productItem.Price;
+                    // productPrice = productItem.Price;
                 }
                 // var orderItem = new OrderItem(itemOrdered, productItem.Price, item.quantity);
                 var orderItem = new OrderItem(itemOrdered, productPrice, item.quantity);

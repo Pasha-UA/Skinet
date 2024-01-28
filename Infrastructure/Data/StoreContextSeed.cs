@@ -49,7 +49,7 @@ namespace Infrastructure.Data
                         {
                             Name = item.Name,
                             Description = item.Description,
-                            Price = item.Price,
+                            // Price = item.Price,
                             ProductBrandId = item.ProductBrandId,
                             ProductTypeId = item.ProductTypeId
                         };

@@ -48,14 +48,14 @@ namespace API.Helpers
                 ;
 
             CreateMap<OfferItem, Product>()
-                .ForMember(d => d.Price, o => o.MapFrom(s => s.RetailPrice))
+                // .ForMember(d => d.Price, o => o.MapFrom(s => s.RetailPrice))
                 .ForMember(d => d.Stock, o => o.MapFrom(s => s.QuantityInStock))
                 .ForMember(d => d.ProductCategoryId, o => o.MapFrom(s => s.CategoryId))
                 .ForMember(d => d.ExternalId, o => o.MapFrom(s => s.Id))
                 ;
 
             CreateMap<OfferItem, ProductCreateDto>()
-                .ForMember(d => d.Price, o => o.MapFrom(s => s.RetailPrice))
+                // .ForMember(d => d.Price, o => o.MapFrom(s => s.RetailPrice))
                 .ForMember(d => d.Stock, o => o.MapFrom(s => s.QuantityInStock))
                 .ForMember(d => d.ProductCategoryId, o => o.MapFrom(s => s.CategoryId))
                 .ForMember(d => d.ExternalId, o => o.MapFrom(s => s.Id))

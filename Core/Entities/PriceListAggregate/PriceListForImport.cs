@@ -145,7 +145,8 @@ namespace Core.Entities
                     // _prices.Add(priceItem); //
                 }
 
-                var pricesWithTypes = prices.Join(this.PriceTypes, p => p.PriceTypeId, pt => pt.Id, (price, priceType) => new { price, priceType });
+                // var pricesWithTypes = prices.Join(this.PriceTypes, p => p.PriceTypeId, pt => pt.Id, (price, priceType) => new { price, priceType });
+                var pricesWithTypes = prices.Join(this.PriceTypes, p => p.PriceTypeId, pt => pt.Id, (price, priceType) => {price.PriceType = priceType; return price;});
                 OfferItem item = new OfferItem()
                 {
                     // Id = productId,
@@ -155,14 +156,14 @@ namespace Core.Entities
                     // // PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).DefaultIfEmpty().ToArray(),
                     // Prices = prices.Where(p => !p.PriceType.IsRetail && !p.PriceType.IsBulk).Any() ? prices.Where(p => !p.PriceType.IsRetail && !p.PriceType.IsBulk).ToList() : null,
                     Id = productExternalId,
-                    RetailPrice = pricesWithTypes.FirstOrDefault(p => p.priceType.IsRetail)?.price.Value,
-                    RetailPriceCurrencyId = pricesWithTypes.FirstOrDefault(p => p.priceType.IsRetail)?.priceType.CurrencyId,
-                    BulkPrice = pricesWithTypes.FirstOrDefault(p => p.priceType.IsBulk)?.price,
+                    // RetailPrice = pricesWithTypes.FirstOrDefault(p => p.PriceType.IsRetail)?.Value,
+                    // RetailPriceCurrencyId = pricesWithTypes.FirstOrDefault(p => p.PriceType.IsRetail)?.PriceType.CurrencyId,
+                    // BulkPrice = pricesWithTypes.FirstOrDefault(p => p.PriceType.IsBulk),
                     // PriceItems = prices.Where(p => !p.IsRetail && !p.IsBulk).DefaultIfEmpty().ToArray(),
-                    // Prices = pricesWithTypes.Where(p => !p.priceType.IsRetail && !p.priceType.IsBulk).Any() ? 
-                    // pricesWithTypes.Where(p => !p.priceType.IsRetail && !p.priceType.IsBulk).Select(p=>p.price).ToList() : null,
+                    // Prices = pricesWithTypes.Where(p => !p.PriceType.IsRetail && !p.PriceType.IsBulk).Any() ? 
+                        // pricesWithTypes.Where(p => !p.PriceType.IsRetail && !p.PriceType.IsBulk).ToList() : null,
                     Prices = pricesWithTypes.Any() ?
-                                    pricesWithTypes.Select(p => p.price).ToList() : null,
+                                    pricesWithTypes.ToList() : null,
                 };
                 offers.Add(item);
             }
@@ -212,6 +213,22 @@ namespace Core.Entities
                     item.Available = "true"; // bool.Parse(parameters.Find(p => p.Id == "ИД-Наличие").Value).ToString();
                     item.Presence = "available";
                     item.QuantityInStock = Int32.Parse(parameters.First(p => p.Id == "ИД-Количество").Value);
+                    // filtering prices
+                    // Если остаток товара меньше, чем минимальное количество заказа при этой цене, то эта цена не добавляется в список. 
+                    // Розничная и оптовая цена добавляется.
+                    if (item.Prices != null && item.Prices.Any())
+                    {
+                        var filteredPriceItems = item.Prices.Where(p => p.PriceType.IsRetail || p.PriceType.Quantity <= item.QuantityInStock || p.PriceType.IsBulk).ToList();
+                        if (filteredPriceItems.Any())
+                        {
+                            item.Prices = filteredPriceItems;
+                        }
+                        else
+                        {
+                            item.Prices = null;
+                        }
+                    }
+
                     var pars = parameters.Where(p => String.Compare(p.Name, "Количество") != 0 && String.Compare(p.Name, "Наличие") != 0);
                     if (pars.Any())
                     {
@@ -244,7 +261,7 @@ namespace Core.Entities
                 this.PriceTypes = FillPriceTypes();
                 this.Offers = FillOfferItems();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

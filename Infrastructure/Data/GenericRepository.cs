@@ -58,7 +58,10 @@ namespace Infrastructure.Data
             {
                 var priceTypes = await _context.Set<PriceType>()
                     .Include(p => p.Currency)
+                    .Cast<T>()
                     .ToListAsync();
+
+                return priceTypes;    
             }
 
             return await _context.Set<T>().ToListAsync();

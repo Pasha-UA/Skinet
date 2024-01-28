@@ -9,7 +9,7 @@ export interface IProduct {
     productType: string;
     productBrand: string;
     productCategory: string;
-    stock: string;
+    stock: number;
     barCode: string;
     photos: IPhoto[];
     prices: IProductPrice[];

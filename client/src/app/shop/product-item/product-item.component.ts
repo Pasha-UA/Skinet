@@ -15,6 +15,7 @@ export class ProductItemComponent implements OnInit {
   productPrices: IProductPrice[];
   retailPrice: IProductPrice;
   bulkPrice: IProductPrice;
+  canAddToBasket: boolean;
 
   constructor(private basketService: BasketService) { }
 
@@ -25,6 +26,7 @@ export class ProductItemComponent implements OnInit {
         .sort((a, b)=>(a.priceType.quantity-b.priceType.quantity));
     this.retailPrice = this.product.prices.find(p => p.priceType.isRetail == true);
     this.bulkPrice = this.product.prices.find(p => p.priceType.isBulk == true);
+    this.canAddToBasket = this.product.visible && (this.product.stock > 0)
   }
 
   addItemToBasket() {

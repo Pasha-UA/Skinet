@@ -30,6 +30,7 @@ export class ShopComponent implements OnInit {
     { name: 'Price: Low to High', value: 'priceAsc' },
     { name: 'Price: High to Low', value: 'priceDesc' }
   ];
+  searchInCategory: boolean = false;
 
 
   constructor(private shopService: ShopService) {
@@ -149,6 +150,7 @@ export class ShopComponent implements OnInit {
   onSearch() {
     const params = this.shopService.getShopParams();
     params.search = this.searchTerm.nativeElement.value;
+    if (!this.searchInCategory) params.categoryId = ''; 
     params.pageNumber = 1;
     this.shopService.setShopParams(params);
     this.getProducts();
@@ -166,6 +168,8 @@ export class ShopComponent implements OnInit {
 
     //console.log(event);
     params.categoryId = event;
+    this.searchTerm.nativeElement.value = '';
+    params.search='';
 
     this.shopService.setShopParams(params);
 

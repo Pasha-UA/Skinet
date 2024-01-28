@@ -11,7 +11,7 @@ namespace API.Dtos
         public string Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public decimal Price { get; set; }
+        // public decimal Price { get; set; }
         public string PictureUrl { get; set; }
         public string ProductType { get; set; }
         public string ProductBrand { get; set; }
@@ -21,7 +21,7 @@ namespace API.Dtos
         public IEnumerable<PhotoToReturnDto> Photos { get; set; }
         public IEnumerable<Price> Prices { get; set; }
         public bool Visible { get; set; }
-        public bool Deleted { get; set; }
+        public DateTime DeletedOn { get; set; }
         
         // public PriceItem BulkPrice { get; set; }
     }

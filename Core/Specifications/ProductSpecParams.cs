@@ -23,6 +23,7 @@ namespace Core.Specifications
         public string Sort { get; set; }
         public bool ShowBulkPrice { get; set; } = false;
         public bool VisibleOnly { get; set; } = true;
+        public bool ShowDeleted { get; set; } = false;
         private string _search;
         public string Search
         {

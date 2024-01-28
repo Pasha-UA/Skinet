@@ -8,34 +8,38 @@ namespace Core.Entities.PriceListAggregate
     public class OfferItem : BaseEntity
     {
 
-            public string Name { get; set; }
-            
-            public string Description { get; set; }
+        public string Name { get; set; }
 
-            public decimal? RetailPrice { get; set; }
+        public string Description { get; set; }
 
-            public string RetailPriceCurrencyId { get; set; }
+        // public decimal? RetailPrice { get; set; }
 
-            public List<Price> Prices { get; set; }
-            public Price BulkPrice { get; set; } // оптовая цена
+        // public string RetailPriceCurrencyId { get; set; }
 
-            public string CategoryId { get; set; }
+        public List<Price> Prices { get; set; }
+        // public Price BulkPrice { get; set; } // оптовая цена
 
-            public string BarCode { get; set; } // код товара в 1с
+        public string CategoryId { get; set; }
 
-            public string Available { get; set; }
+        public string BarCode { get; set; } // код товара в 1с
 
-            public string Presence { get; set; } // наличие
+        public string Available { get; set; }
 
-            public string[] SearchStrings { get; set; }
+        public string Presence { get; set; } // наличие
 
-            public int? QuantityInStock { get; set; }
+        public string[] SearchStrings { get; set; }
 
-            public ParameterItem[] Parameters { get; set; }
+        public int? QuantityInStock { get; set; }
 
-            // public string SellingType { get; set; }
+        public ParameterItem[] Parameters { get; set; }
 
-            //... add necessary fields
+        public bool Visible { get; set; } = true;
+        public DateTime DeletedOn { get; set; } = DateTime.MinValue;
+
+
+        // public string SellingType { get; set; }
+
+        //... add necessary fields
 
     }
 

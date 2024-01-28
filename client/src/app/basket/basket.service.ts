@@ -61,8 +61,15 @@ export class BasketService {
   addItemToBasket(item: IProduct, quantity = 1) {
     const itemToAdd: IBasketItem = this.mapProductItemToBasketItem(item, quantity);
     const basket = this.getCurrentBasketValue() ?? this.createBasket();
-    basket.items = this.addOrUpdateItem(basket.items, itemToAdd, quantity);
-    this.setBasket(basket);
+    const itemInBasket = basket.items.find(i => i.id === item.id);
+    let success = false;
+    console.log(itemInBasket, item);
+    if (!itemInBasket || itemInBasket.quantity < item.stock) {
+      basket.items = this.addOrUpdateItem(basket.items, itemToAdd, quantity);
+      this.setBasket(basket);
+      success = true;
+    }
+    return success;
   }
 
   incrementItemQuantity(item: IBasketItem) {
@@ -71,7 +78,6 @@ export class BasketService {
 
     basket.items = this.addOrUpdateItem(basket.items, basket.items[foundItemIndex], 1);
 
-    // basket.items[foundItemIndex].quantity++;
     this.setBasket(basket);
   }
 
@@ -126,13 +132,15 @@ export class BasketService {
     const index = items.findIndex(i => i.id === itemToAdd.id);
     if (index === -1) {
       itemToAdd.quantity = quantity;
+      const recalculatedPrice = this.calculateItemPrice(itemToAdd, itemToAdd.quantity).value;
+      itemToAdd.price = recalculatedPrice;
       items.push(itemToAdd);
     }
     else {
       items[index].quantity += quantity;
 
       // recalculate price 
-      const recalculatedPrice = this.calculateItemPrice(items[index], items[index].quantity).value; 
+      const recalculatedPrice = this.calculateItemPrice(items[index], items[index].quantity).value;
       items[index].price = recalculatedPrice;
     }
 
@@ -168,13 +176,13 @@ export class BasketService {
     let price: IProductPrice;
     if (item.prices && item.prices.length > 0) {
       const prices = item.prices;
-      const filteredPricesArr: IProductPrice[] = prices.filter((price) => price.priceType.quantity <= quantity);
+      const filteredPricesArr: IProductPrice[] = prices.filter((price) => ((price.priceType.quantity <= quantity) && !price.priceType.isBulk));
       const maxQuantity: number = Math.max(...filteredPricesArr.map((price) => price.priceType.quantity));
       price = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity);
       // const price: number = filteredPricesArr.find((price) => price.priceType.quantity === maxQuantity).value;
     }
     else {
-      price = item.prices.find(x=>x.priceType.quantity==1);
+      price = item.prices.find(x => ((x.priceType.quantity == 1) && !price.priceType.isBulk));
     }
 
     return price;

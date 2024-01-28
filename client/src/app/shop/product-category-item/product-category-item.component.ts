@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ICategory } from 'src/app/shared/models/productCategory';
 import { ShopService } from '../shop.service';
 
@@ -8,6 +8,8 @@ import { ShopService } from '../shop.service';
   styleUrls: ['./product-category-item.component.scss']
 })
 export class ProductCategoryItemComponent implements OnInit {
+  @Output() categorySelected: EventEmitter<string> = new EventEmitter<string>();
+
   @Input() category: ICategory;
   // childProductCount: number;
   childCategoryCount: number;
@@ -25,6 +27,11 @@ export class ProductCategoryItemComponent implements OnInit {
     this.shopService.getChildrenProductsCount(this.category.id).subscribe({
       next: response => this.totalChildProductsCount = response
     })
+
+  }
+
+  categoryClicked(category) {
+    this.categorySelected.emit(category.id);
 
   }
 

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountService } from './account/account.service';
 import { BasketService } from './basket/basket.service';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,7 @@ import { BasketService } from './basket/basket.service';
 export class AppComponent implements OnInit {
   title = 'Skinet';
 
-  constructor(private basketService: BasketService, private accountService: AccountService) { }
+  constructor(private basketService: BasketService, private accountService: AccountService, private cookieService: CookieService ) { }
 
   ngOnInit(): void {
     this.loadBasket();
@@ -18,7 +19,8 @@ export class AppComponent implements OnInit {
   }
 
   loadCurrentUser() {
-    const token = localStorage.getItem('token');
+    // const token = localStorage.getItem('token');
+    const token = this.cookieService.get('token')
     this.accountService.loadCurrentUser(token).subscribe({
       next: () => {
         console.log('loaded user');

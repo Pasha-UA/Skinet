@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable, of } from 'rxjs';
+import { forkJoin, map, Observable, of } from 'rxjs';
 import { IBrand } from '../shared/models/brand';
 import { IPagination, Pagination } from '../shared/models/pagination';
 import { IProduct } from '../shared/models/product';
@@ -95,6 +95,11 @@ export class ShopService {
     }
 
     return this.http.get<IProduct>(this.baseUrl + 'products/' + id);
+  }
+
+  getProductsArray(productsIdArray: string[]): Observable<IProduct[]> {
+    const product$ = productsIdArray.map(id => this.getProduct(id));
+    return forkJoin(product$);
   }
 
   getBrands() {
